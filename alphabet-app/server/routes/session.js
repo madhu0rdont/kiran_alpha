@@ -67,7 +67,7 @@ router.get('/letters', (req, res) => {
   }
 
   const rows = db.prepare(`
-    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
     WHERE p.mode = ?

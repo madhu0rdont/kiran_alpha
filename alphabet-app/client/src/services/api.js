@@ -42,3 +42,26 @@ export function getProgress(mode) {
 export function getProgressLetters(mode) {
   return request('GET', `/progress/letters?mode=${mode}`);
 }
+
+export function getAdminLetters() {
+  return request('GET', '/admin/letters');
+}
+
+export async function uploadLetterImage(letter, file) {
+  const form = new FormData();
+  form.append('image', file);
+  const res = await fetch(`${BASE}/admin/upload/${letter}`, { method: 'POST', body: form });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'Upload failed');
+  }
+  return res.json();
+}
+
+export function updateLetterWord(letter, word) {
+  return request('PUT', `/admin/word/${letter}`, { word });
+}
+
+export function deleteLetterImage(letter) {
+  return request('DELETE', `/admin/image/${letter}`);
+}

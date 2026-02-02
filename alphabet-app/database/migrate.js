@@ -16,6 +16,8 @@ db.exec(`
     case_type TEXT NOT NULL CHECK (case_type IN ('upper', 'lower')),
     image_name TEXT NOT NULL,
     display_order INTEGER NOT NULL,
+    has_image INTEGER NOT NULL DEFAULT 0,
+    display_word TEXT DEFAULT NULL,
     UNIQUE(character, case_type)
   );
 

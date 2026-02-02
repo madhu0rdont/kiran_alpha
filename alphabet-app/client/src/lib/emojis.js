@@ -55,3 +55,7 @@ export const WORD_MAP = {
   yoyo: 'Yoyo',
   zuma: 'Zuma',
 };
+
+export function getImageUrl(character) {
+  return `/images/letters/${character.toUpperCase()}.png`;
+}

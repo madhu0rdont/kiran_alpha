@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import db from './db.js';
 import sessionRouter from './routes/session.js';
+import adminRouter from './routes/admin.js';
 
 const app = express();
 app.use(cors());
@@ -26,6 +27,7 @@ app.get('/api/letters', (req, res) => {
 
 app.use('/api/session', sessionRouter);
 app.use('/api/progress', sessionRouter);
+app.use('/api/admin', adminRouter);
 
 app.listen(3001, () => {
   console.log('Server running on http://localhost:3001');

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { startSession, gradeCard } from '../services/api';
-import { EMOJI_MAP, WORD_MAP } from '../lib/emojis';
+import { EMOJI_MAP, WORD_MAP, getImageUrl } from '../lib/emojis';
 import { playCorrect, playWrong } from '../lib/sounds';
 
 export default function Session({ muted, setMuted }) {
@@ -165,7 +165,7 @@ export default function Session({ muted, setMuted }) {
   if (!card) return null;
 
   const emoji = EMOJI_MAP[card.image_name] || '?';
-  const word = WORD_MAP[card.image_name] || card.image_name;
+  const word = card.display_word || WORD_MAP[card.image_name] || card.image_name;
   const progressPct = queue.length > 0 ? Math.min(100, (currentIndex / queue.length) * 100) : 0;
 
   return (
@@ -220,7 +220,15 @@ export default function Session({ muted, setMuted }) {
             {card.character}
           </span>
 
-          <span className="text-7xl mt-4">{emoji}</span>
+          {card.has_image ? (
+            <img
+              src={getImageUrl(card.character)}
+              alt={word}
+              className="w-32 h-32 object-cover rounded-2xl mt-4"
+            />
+          ) : (
+            <span className="text-7xl mt-4">{emoji}</span>
+          )}
 
           <p className="text-2xl text-gray-500 mt-3 font-medium">{word}</p>
         </div>

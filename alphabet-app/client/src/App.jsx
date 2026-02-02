@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Session from './pages/Session';
 import SessionComplete from './pages/SessionComplete';
 import Progress from './pages/Progress';
+import Admin from './pages/Admin';
 
 export default function App() {
   const [muted, setMuted] = useState(true);
@@ -15,6 +16,7 @@ export default function App() {
       <Route path="/complete/:mode" element={<SessionComplete muted={muted} />} />
       <Route path="/progress" element={<Navigate to="/progress/upper" replace />} />
       <Route path="/progress/:mode" element={<Progress />} />
+      <Route path="/admin" element={<Admin />} />
     </Routes>
   );
 }

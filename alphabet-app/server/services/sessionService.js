@@ -7,7 +7,7 @@ const now = () => new Date().toISOString().replace('T', ' ').split('.')[0];
 
 const stmts = {
   problemLetters: db.prepare(`
-    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
     WHERE p.mode = ? AND p.recent_fails >= 2
@@ -16,7 +16,7 @@ const stmts = {
   `),
 
   dueLetters: db.prepare(`
-    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
     WHERE p.mode = ? AND p.status = 'learning' AND p.recent_fails < 2
@@ -30,7 +30,7 @@ const stmts = {
   `),
 
   newLetters: db.prepare(`
-    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
     WHERE p.mode = ? AND p.status = 'new'
@@ -39,7 +39,7 @@ const stmts = {
   `),
 
   masteredLetters: db.prepare(`
-    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
     WHERE p.mode = ? AND p.status = 'mastered'
@@ -60,7 +60,7 @@ const stmts = {
   `),
 
   getProgress: db.prepare(`
-    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
     WHERE p.letter_id = ? AND p.mode = ?
@@ -100,7 +100,7 @@ const stmts = {
   `),
 
   problemList: db.prepare(`
-    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
     WHERE p.mode = ? AND p.recent_fails >= 2
@@ -125,6 +125,8 @@ export function getSessionCards(mode, count = 10) {
         character: row.character,
         case_type: row.case_type,
         image_name: row.image_name,
+        has_image: !!row.has_image,
+        display_word: row.display_word || null,
         is_new: flags.is_new || false,
         is_problem: flags.is_problem || false,
       });
