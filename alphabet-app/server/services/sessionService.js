@@ -180,6 +180,12 @@ export function getSessionCards(mode, count = 10) {
     addCards(stmts.newLetters.all(mode, remaining + seen.size), { is_new: true });
   }
 
+  // Shuffle cards so they're not always in the same order
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+
   // Create a session record
   const newLetterIds = cards.filter(c => c.is_new).map(c => c.letter_id).join(',');
   const info = stmts.createSession.run(mode, cards.length, newLetterIds);
