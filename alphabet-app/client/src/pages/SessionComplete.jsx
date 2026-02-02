@@ -18,9 +18,25 @@ export default function SessionComplete({ muted }) {
   const { mode } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
-  const [particles, setParticles] = useState([]);
-
   const { sessionId, totalShown = 0, correctCount = 0, results = [], cards = [] } = state || {};
+
+  const [particles] = useState(() => {
+    const items = [];
+    for (let i = 0; i < 12; i++) {
+      const leftBase = (i * 7 + 10) % 80 + 10;
+      const topBase = (i * 5 + 30) % 40 + 30;
+      items.push({
+        id: i,
+        emoji: CELEBRATION_EMOJIS[i % CELEBRATION_EMOJIS.length],
+        style: {
+          left: `${leftBase}%`,
+          top: `${topBase}%`,
+          animationDelay: `${i * 0.15}s`,
+        },
+      });
+    }
+    return items;
+  });
   const pct = totalShown > 0 ? Math.round((correctCount / totalShown) * 100) : 0;
 
   const newLetters = cards.filter(c => c.is_new);
@@ -33,22 +49,7 @@ export default function SessionComplete({ muted }) {
       completeSession(sessionId, totalShown, correctCount).catch(() => {});
     }
     if (!muted) playCelebration();
-
-    // Spawn celebration particles
-    const items = [];
-    for (let i = 0; i < 12; i++) {
-      items.push({
-        id: i,
-        emoji: CELEBRATION_EMOJIS[i % CELEBRATION_EMOJIS.length],
-        style: {
-          left: `${10 + Math.random() * 80}%`,
-          top: `${30 + Math.random() * 40}%`,
-          animationDelay: `${i * 0.15}s`,
-        },
-      });
-    }
-    setParticles(items);
-  }, []);
+  }, [sessionId, totalShown, correctCount, muted]);
 
   if (!state) {
     return (

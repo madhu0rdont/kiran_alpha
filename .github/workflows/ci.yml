@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: alphabet-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm run install:all
+
+      - name: Lint server
+        run: cd server && npm run lint
+
+      - name: Lint client
+        run: cd client && npm run lint
+
+      - name: Server tests
+        run: cd server && npm test
+
+      - name: Client tests
+        run: cd client && npm test

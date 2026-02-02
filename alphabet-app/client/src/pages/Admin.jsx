@@ -89,6 +89,7 @@ function LetterCard({ letter, uploading, onUpload, onDelete, onWordUpdate }) {
   const fileRef = useRef(null);
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+  const [cacheBust] = useState(() => Date.now());
   const char = letter.character;
   const emoji = EMOJI_MAP[letter.image_name] || '?';
   const defaultWord = WORD_MAP[letter.image_name] || letter.image_name;
@@ -106,7 +107,7 @@ function LetterCard({ letter, uploading, onUpload, onDelete, onWordUpdate }) {
 
       {letter.has_image ? (
         <img
-          src={`${getImageUrl(char)}?t=${Date.now()}`}
+          src={`${getImageUrl(char)}?t=${cacheBust}`}
           alt={char}
           className="w-24 h-24 object-cover rounded-xl mb-2"
         />

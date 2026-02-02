@@ -15,7 +15,7 @@ vi.mock('../lib/sounds', () => ({
   playWrong: vi.fn(),
 }));
 
-import { startSession, gradeCard } from '../services/api';
+import { startSession } from '../services/api';
 
 function renderSession(mode = 'upper') {
   return render(

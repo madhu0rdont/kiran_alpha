@@ -1,8 +1,9 @@
-const audioCtx = typeof AudioContext !== 'undefined'
-  ? new AudioContext()
-  : typeof webkitAudioContext !== 'undefined'
-    ? new webkitAudioContext()
+const AudioCtx = typeof AudioContext !== 'undefined'
+  ? AudioContext
+  : typeof window !== 'undefined' && window.webkitAudioContext
+    ? window.webkitAudioContext
     : null;
+const audioCtx = AudioCtx ? new AudioCtx() : null;
 
 function play(frequencies, durations, type = 'sine', gain = 0.15) {
   if (!audioCtx) return;

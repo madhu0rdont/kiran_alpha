@@ -94,17 +94,19 @@ export default function Progress() {
   const [selected, setSelected] = useState(null); // { letter, info }
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     Promise.all([
       getProgress(mode),
       getProgressLetters(mode),
     ])
       .then(([summary, allProgress]) => {
+        if (cancelled) return;
         setData(summary);
         setProgressData(allProgress);
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [mode]);
 
   const handleTap = (letter, info) => {

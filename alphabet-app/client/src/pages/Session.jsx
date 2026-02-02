@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { startSession, gradeCard } from '../services/api';
 import { EMOJI_MAP, WORD_MAP, getImageUrl } from '../lib/emojis';
@@ -19,7 +19,7 @@ export default function Session({ muted, setMuted }) {
   const [grading, setGrading] = useState(false);
   const [cardAnim, setCardAnim] = useState('animate-slide-in');
   const [feedbackAnim, setFeedbackAnim] = useState('');
-  const animKey = useRef(0);
+  const [animKey, setAnimKey] = useState(0);
 
   useEffect(() => {
     startSession(mode)
@@ -108,7 +108,7 @@ export default function Session({ muted, setMuted }) {
 
     // Advance card after animation
     setTimeout(() => {
-      animKey.current += 1;
+      setAnimKey(k => k + 1);
       setCardAnim('animate-slide-in');
       setFeedbackAnim('');
       setCurrentIndex(nextIndex);
@@ -212,7 +212,7 @@ export default function Session({ muted, setMuted }) {
         </div>
 
         {/* Letter card */}
-        <div key={animKey.current} className={`bg-white rounded-3xl shadow-xl w-full py-8 flex flex-col items-center ${cardAnim}`}>
+        <div key={animKey} className={`bg-white rounded-3xl shadow-xl w-full py-8 flex flex-col items-center ${cardAnim}`}>
           <span
             className="font-bold text-indigo-600 leading-none"
             style={{ fontSize: 'clamp(120px, 30vw, 200px)' }}

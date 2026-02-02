@@ -9,7 +9,7 @@ beforeEach(async () => {
 });
 
 function mockFetch(responseData, ok = true, status = 200) {
-  global.fetch = vi.fn().mockResolvedValue({
+  globalThis.fetch = vi.fn().mockResolvedValue({
     ok,
     status,
     statusText: 'Error',
@@ -83,7 +83,7 @@ describe('updateLetterWord', () => {
 
 describe('uploadLetterImage', () => {
   it('sends FormData via POST', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ success: true }),
     });
