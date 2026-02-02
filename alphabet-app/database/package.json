@@ -1,0 +1,13 @@
+{
+  "name": "alphabet-app-database",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate": "node migrate.js",
+    "seed": "node seed.js",
+    "reset": "rm -f alphabet.db alphabet.db-shm alphabet.db-wal && node migrate.js && node seed.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0"
+  }
+}

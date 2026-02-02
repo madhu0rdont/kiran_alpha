@@ -1,0 +1,16 @@
+{
+  "name": "alphabet-app",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "db:migrate": "cd database && npm run migrate",
+    "db:seed": "cd database && npm run seed",
+    "db:reset": "cd database && npm run reset",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install && cd ../database && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
