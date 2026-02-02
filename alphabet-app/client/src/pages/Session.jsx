@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { startSession, gradeCard } from '../services/api';
 import { EMOJI_MAP, WORD_MAP, getImageUrl } from '../lib/emojis';
 import { playCorrect, playWrong } from '../lib/sounds';
+import { speakLetterAndWord } from '../lib/speech';
 
 export default function Session({ muted, setMuted }) {
   const { mode } = useParams();
@@ -51,6 +52,14 @@ export default function Session({ muted, setMuted }) {
 
   const card = queue[currentIndex];
   const retryCount = queue.length - currentIndex - 1;
+
+  // Auto-speak letter and word when card changes
+  useEffect(() => {
+    if (!muted && card) {
+      const w = card.display_word || WORD_MAP[card.image_name] || card.image_name;
+      speakLetterAndWord(card.character, w);
+    }
+  }, [currentIndex, muted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const finishSession = useCallback((newTotalShown, newCorrectCount, newResults) => {
     navigate(`/complete/${mode}`, {
@@ -212,7 +221,11 @@ export default function Session({ muted, setMuted }) {
         </div>
 
         {/* Letter card */}
-        <div key={animKey} className={`bg-white rounded-3xl shadow-xl w-full py-8 flex flex-col items-center ${cardAnim}`}>
+        <div
+          key={animKey}
+          className={`bg-white rounded-3xl shadow-xl w-full py-8 flex flex-col items-center cursor-pointer ${cardAnim}`}
+          onClick={() => !muted && speakLetterAndWord(card.character, word)}
+        >
           <span
             className="font-bold text-indigo-600 leading-none"
             style={{ fontSize: 'clamp(120px, 30vw, 200px)' }}
@@ -230,7 +243,9 @@ export default function Session({ muted, setMuted }) {
             <span className="text-7xl mt-4">{emoji}</span>
           )}
 
-          <p className="text-2xl text-gray-500 mt-3 font-medium">{word}</p>
+          <p className="text-2xl text-gray-500 mt-3 font-medium">
+            {word} <span className="text-lg opacity-40">🔈</span>
+          </p>
         </div>
       </div>
 

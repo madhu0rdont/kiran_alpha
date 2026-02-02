@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { completeSession } from '../services/api';
 import { EMOJI_MAP } from '../lib/emojis';
 import { playCelebration } from '../lib/sounds';
+import { speakWord } from '../lib/speech';
 
 const CELEBRATION_EMOJIS = ['⭐', '🌟', '✨', '🎉', '🥳', '💫', '🎊'];
 
@@ -48,7 +49,10 @@ export default function SessionComplete({ muted }) {
     if (sessionId) {
       completeSession(sessionId, totalShown, correctCount).catch(() => {});
     }
-    if (!muted) playCelebration();
+    if (!muted) {
+      playCelebration();
+      setTimeout(() => speakWord('Great job!'), 600);
+    }
   }, [sessionId, totalShown, correctCount, muted]);
 
   if (!state) {
