@@ -6,7 +6,7 @@ import { playCorrect, playWrong } from '../lib/sounds';
 import { speakLetterAndWord } from '../lib/speech';
 
 export default function Session({ muted, setMuted }) {
-  const { mode } = useParams();
+  const { mode, childId } = useParams();
   const navigate = useNavigate();
 
   const [sessionId, setSessionId] = useState(null);
@@ -23,7 +23,7 @@ export default function Session({ muted, setMuted }) {
   const [animKey, setAnimKey] = useState(0);
 
   useEffect(() => {
-    startSession(mode)
+    startSession(mode, childId)
       .then(data => {
         setSessionId(data.session_id);
         setQueue(data.cards);
@@ -33,7 +33,7 @@ export default function Session({ muted, setMuted }) {
         setError('Could not connect to server. Is the backend running?');
         setLoading(false);
       });
-  }, [mode]);
+  }, [mode, childId]);
 
   // Block browser back button with confirmation
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function Session({ muted, setMuted }) {
   }, [currentIndex, muted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const finishSession = useCallback((newTotalShown, newCorrectCount, newResults) => {
-    navigate(`/complete/${mode}`, {
+    navigate(`/child/${childId}/complete/${mode}`, {
       state: {
         sessionId,
         totalShown: newTotalShown,
@@ -71,7 +71,7 @@ export default function Session({ muted, setMuted }) {
         cards: queue.filter(c => c.is_new),
       },
     });
-  }, [mode, sessionId, queue, navigate]);
+  }, [mode, childId, sessionId, queue, navigate]);
 
   const handleGrade = useCallback(async (correct) => {
     if (grading || !card) return;
@@ -86,7 +86,7 @@ export default function Session({ muted, setMuted }) {
     setFeedbackAnim(correct ? 'animate-flash-green' : 'animate-shake');
 
     try {
-      await gradeCard(card.letter_id, mode, correct);
+      await gradeCard(card.letter_id, mode, childId, correct);
     } catch {
       // Will sync next time
     }

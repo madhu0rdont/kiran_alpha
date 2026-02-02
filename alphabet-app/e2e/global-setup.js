@@ -19,6 +19,12 @@ export default function globalSetup() {
   db.pragma('foreign_keys = ON');
 
   db.exec(`
+    CREATE TABLE IF NOT EXISTS profiles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      avatar TEXT DEFAULT '🧒',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
     CREATE TABLE IF NOT EXISTS letters (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       character TEXT NOT NULL,
@@ -31,6 +37,7 @@ export default function globalSetup() {
     );
     CREATE TABLE IF NOT EXISTS progress (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      child_id INTEGER NOT NULL DEFAULT 1 REFERENCES profiles(id) ON DELETE CASCADE,
       letter_id INTEGER NOT NULL REFERENCES letters(id),
       mode TEXT NOT NULL CHECK (mode IN ('upper', 'lower', 'both')),
       status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'learning', 'mastered')),
@@ -42,10 +49,11 @@ export default function globalSetup() {
       times_failed INTEGER NOT NULL DEFAULT 0,
       recent_fails INTEGER NOT NULL DEFAULT 0,
       introduced_date TEXT,
-      UNIQUE(letter_id, mode)
+      UNIQUE(child_id, letter_id, mode)
     );
     CREATE TABLE IF NOT EXISTS sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      child_id INTEGER NOT NULL DEFAULT 1 REFERENCES profiles(id) ON DELETE CASCADE,
       mode TEXT NOT NULL CHECK (mode IN ('upper', 'lower', 'both')),
       started_at TEXT NOT NULL DEFAULT (datetime('now')),
       completed_at TEXT,
@@ -55,7 +63,9 @@ export default function globalSetup() {
     );
     CREATE INDEX IF NOT EXISTS idx_progress_next_review ON progress(next_review_date);
     CREATE INDEX IF NOT EXISTS idx_progress_status ON progress(status);
+    CREATE INDEX IF NOT EXISTS idx_progress_child ON progress(child_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at);
+    CREATE INDEX IF NOT EXISTS idx_sessions_child ON sessions(child_id);
   `);
 
   const imagesDir = path.join(__dirname, '..', 'client', 'public', 'images', 'letters');

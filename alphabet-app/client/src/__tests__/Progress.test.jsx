@@ -44,10 +44,10 @@ const defaultSummary = {
 
 function renderProgress(mode = 'upper') {
   return render(
-    <MemoryRouter initialEntries={[`/progress/${mode}`]}>
+    <MemoryRouter initialEntries={[`/child/1/progress/${mode}`]}>
       <Routes>
-        <Route path="/progress/:mode" element={<Progress />} />
-        <Route path="/" element={<div>Home</div>} />
+        <Route path="/child/:childId/progress/:mode" element={<Progress />} />
+        <Route path="/child/:childId" element={<div>Home</div>} />
       </Routes>
     </MemoryRouter>
   );

@@ -1,34 +1,37 @@
 import { Router } from 'express';
-import db from '../db.js';
-import { getSessionCards, gradeCard, completeSession, getProgress } from '../services/sessionService.js';
+import { getSessionCards, gradeCard, completeSession, getProgress, getProgressLetters } from '../services/sessionService.js';
 
 const router = Router();
 
-// GET /api/session/start?mode=upper|lower|both&count=10
+// GET /api/session/start?mode=upper|lower|both&child_id=1&count=10
 router.get('/start', (req, res) => {
   const mode = req.query.mode || 'upper';
+  const childId = parseInt(req.query.child_id, 10);
   const count = parseInt(req.query.count, 10) || 10;
 
   if (!['upper', 'lower', 'both'].includes(mode)) {
     return res.status(400).json({ error: 'mode must be upper, lower, or both' });
   }
+  if (!childId) {
+    return res.status(400).json({ error: 'child_id is required' });
+  }
 
-  const result = getSessionCards(mode, count);
+  const result = getSessionCards(mode, childId, count);
   res.json(result);
 });
 
-// POST /api/session/grade { letter_id, mode, correct }
+// POST /api/session/grade { letter_id, mode, child_id, correct }
 router.post('/grade', (req, res) => {
-  const { letter_id, mode, correct } = req.body;
+  const { letter_id, mode, child_id, correct } = req.body;
 
-  if (!letter_id || !mode || correct === undefined) {
-    return res.status(400).json({ error: 'letter_id, mode, and correct are required' });
+  if (!letter_id || !mode || correct === undefined || !child_id) {
+    return res.status(400).json({ error: 'letter_id, mode, child_id, and correct are required' });
   }
   if (!['upper', 'lower', 'both'].includes(mode)) {
     return res.status(400).json({ error: 'mode must be upper, lower, or both' });
   }
 
-  const result = gradeCard(letter_id, mode, !!correct);
+  const result = gradeCard(letter_id, mode, child_id, !!correct);
   res.json(result);
 });
 
@@ -47,32 +50,35 @@ router.post('/complete', (req, res) => {
   res.json(session);
 });
 
-// GET /api/progress?mode=upper|lower|both
+// GET /api/progress?mode=upper|lower|both&child_id=1
 router.get('/', (req, res) => {
   const mode = req.query.mode || 'upper';
+  const childId = parseInt(req.query.child_id, 10);
 
   if (!['upper', 'lower', 'both'].includes(mode)) {
     return res.status(400).json({ error: 'mode must be upper, lower, or both' });
   }
+  if (!childId) {
+    return res.status(400).json({ error: 'child_id is required' });
+  }
 
-  const result = getProgress(mode);
+  const result = getProgress(mode, childId);
   res.json(result);
 });
 
-// GET /api/progress/letters?mode=upper|lower|both
+// GET /api/progress/letters?mode=upper|lower|both&child_id=1
 router.get('/letters', (req, res) => {
   const mode = req.query.mode || 'upper';
+  const childId = parseInt(req.query.child_id, 10);
+
   if (!['upper', 'lower', 'both'].includes(mode)) {
     return res.status(400).json({ error: 'mode must be upper, lower, or both' });
   }
+  if (!childId) {
+    return res.status(400).json({ error: 'child_id is required' });
+  }
 
-  const rows = db.prepare(`
-    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
-    FROM progress p
-    JOIN letters l ON l.id = p.letter_id
-    WHERE p.mode = ?
-    ORDER BY l.display_order
-  `).all(mode);
+  const rows = getProgressLetters(mode, childId);
   res.json(rows);
 });
 

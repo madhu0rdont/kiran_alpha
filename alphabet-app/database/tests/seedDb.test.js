@@ -15,6 +15,12 @@ function createDb() {
   const d = new Database(dbPath);
   d.pragma('foreign_keys = ON');
   d.exec(`
+    CREATE TABLE profiles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      avatar TEXT DEFAULT '🧒',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
     CREATE TABLE letters (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       character TEXT NOT NULL,
@@ -27,6 +33,7 @@ function createDb() {
     );
     CREATE TABLE progress (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      child_id INTEGER NOT NULL DEFAULT 1 REFERENCES profiles(id) ON DELETE CASCADE,
       letter_id INTEGER NOT NULL REFERENCES letters(id),
       mode TEXT NOT NULL CHECK (mode IN ('upper', 'lower', 'both')),
       status TEXT NOT NULL DEFAULT 'new',
@@ -38,10 +45,11 @@ function createDb() {
       times_failed INTEGER NOT NULL DEFAULT 0,
       recent_fails INTEGER NOT NULL DEFAULT 0,
       introduced_date TEXT,
-      UNIQUE(letter_id, mode)
+      UNIQUE(child_id, letter_id, mode)
     );
     CREATE TABLE sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      child_id INTEGER NOT NULL DEFAULT 1 REFERENCES profiles(id) ON DELETE CASCADE,
       mode TEXT NOT NULL,
       started_at TEXT NOT NULL DEFAULT (datetime('now')),
       completed_at TEXT,

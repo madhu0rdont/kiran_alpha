@@ -11,13 +11,17 @@ vi.mock('../lib/sounds', () => ({
   playCelebration: vi.fn(),
 }));
 
+vi.mock('../lib/speech', () => ({
+  speakWord: vi.fn(),
+}));
+
 function renderComplete(state) {
   return render(
-    <MemoryRouter initialEntries={[{ pathname: '/complete/upper', state }]}>
+    <MemoryRouter initialEntries={[{ pathname: '/child/1/complete/upper', state }]}>
       <Routes>
-        <Route path="/complete/:mode" element={<SessionComplete muted={true} />} />
-        <Route path="/session/:mode" element={<div>Session</div>} />
-        <Route path="/" element={<div>Home Page</div>} />
+        <Route path="/child/:childId/complete/:mode" element={<SessionComplete muted={true} />} />
+        <Route path="/child/:childId/session/:mode" element={<div>Session</div>} />
+        <Route path="/child/:childId" element={<div>Home Page</div>} />
       </Routes>
     </MemoryRouter>
   );

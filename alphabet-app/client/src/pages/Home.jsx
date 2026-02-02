@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const modes = [
   { mode: 'both', label: 'ABC + abc', desc: 'Upper & lowercase', color: 'bg-blue-500 active:bg-blue-600' },
@@ -8,6 +8,7 @@ const modes = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const { childId } = useParams();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center justify-center px-6 py-10">
@@ -20,7 +21,7 @@ export default function Home() {
         {modes.map(({ mode, label, desc, color }) => (
           <button
             key={mode}
-            onClick={() => navigate(`/session/${mode}`)}
+            onClick={() => navigate(`/child/${childId}/session/${mode}`)}
             className={`${color} text-white rounded-3xl py-6 px-8 text-center shadow-lg transition-transform active:scale-95`}
           >
             <span className="block text-3xl font-bold">{label}</span>
@@ -30,10 +31,17 @@ export default function Home() {
       </div>
 
       <button
-        onClick={() => navigate('/progress/upper')}
+        onClick={() => navigate(`/child/${childId}/progress/upper`)}
         className="mt-10 text-indigo-500 text-lg font-semibold underline underline-offset-4 active:text-indigo-700"
       >
         View Progress
+      </button>
+
+      <button
+        onClick={() => navigate('/')}
+        className="mt-4 text-gray-400 text-sm font-medium active:text-gray-600"
+      >
+        Switch Child
       </button>
     </div>
   );

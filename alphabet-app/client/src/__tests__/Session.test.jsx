@@ -15,14 +15,19 @@ vi.mock('../lib/sounds', () => ({
   playWrong: vi.fn(),
 }));
 
+// Mock speech
+vi.mock('../lib/speech', () => ({
+  speakLetterAndWord: vi.fn(),
+}));
+
 import { startSession } from '../services/api';
 
 function renderSession(mode = 'upper') {
   return render(
-    <MemoryRouter initialEntries={[`/session/${mode}`]}>
+    <MemoryRouter initialEntries={[`/child/1/session/${mode}`]}>
       <Routes>
-        <Route path="/session/:mode" element={<Session muted={true} setMuted={() => {}} />} />
-        <Route path="/complete/:mode" element={<div>Complete</div>} />
+        <Route path="/child/:childId/session/:mode" element={<Session muted={true} setMuted={() => {}} />} />
+        <Route path="/child/:childId/complete/:mode" element={<div>Complete</div>} />
       </Routes>
     </MemoryRouter>
   );

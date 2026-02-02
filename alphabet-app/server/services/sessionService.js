@@ -10,7 +10,7 @@ const stmts = {
     SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
-    WHERE p.mode = ? AND p.recent_fails >= 2
+    WHERE p.child_id = ? AND p.mode = ? AND p.recent_fails >= 2
       AND (p.next_review_date IS NULL OR p.next_review_date <= ?)
     ORDER BY p.recent_fails DESC, p.next_review_date ASC
   `),
@@ -19,21 +19,21 @@ const stmts = {
     SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
-    WHERE p.mode = ? AND p.status = 'learning' AND p.recent_fails < 2
+    WHERE p.child_id = ? AND p.mode = ? AND p.status = 'learning' AND p.recent_fails < 2
       AND p.next_review_date <= ?
     ORDER BY p.next_review_date ASC
   `),
 
   learningCount: db.prepare(`
     SELECT COUNT(*) as c FROM progress
-    WHERE mode = ? AND status = 'learning'
+    WHERE child_id = ? AND mode = ? AND status = 'learning'
   `),
 
   newLetters: db.prepare(`
     SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
-    WHERE p.mode = ? AND p.status = 'new'
+    WHERE p.child_id = ? AND p.mode = ? AND p.status = 'new'
     ORDER BY l.display_order ASC
     LIMIT ?
   `),
@@ -42,28 +42,28 @@ const stmts = {
     SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
-    WHERE p.mode = ? AND p.status = 'mastered'
+    WHERE p.child_id = ? AND p.mode = ? AND p.status = 'mastered'
     ORDER BY p.last_reviewed ASC
     LIMIT ?
   `),
 
   lastSession: db.prepare(`
     SELECT * FROM sessions
-    WHERE mode = ? AND completed_at IS NOT NULL
+    WHERE child_id = ? AND mode = ? AND completed_at IS NOT NULL
     ORDER BY completed_at DESC
     LIMIT 1
   `),
 
   sessionCount: db.prepare(`
     SELECT COUNT(*) as c FROM sessions
-    WHERE mode = ? AND completed_at IS NOT NULL
+    WHERE child_id = ? AND mode = ? AND completed_at IS NOT NULL
   `),
 
   getProgress: db.prepare(`
     SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
-    WHERE p.letter_id = ? AND p.mode = ?
+    WHERE p.child_id = ? AND p.letter_id = ? AND p.mode = ?
   `),
 
   updateProgress: db.prepare(`
@@ -71,12 +71,12 @@ const stmts = {
     SET status = ?, ease_factor = ?, interval_days = ?, repetitions = ?,
         next_review_date = ?, last_reviewed = ?, times_failed = ?,
         recent_fails = ?, introduced_date = COALESCE(introduced_date, ?)
-    WHERE letter_id = ? AND mode = ?
+    WHERE child_id = ? AND letter_id = ? AND mode = ?
   `),
 
   createSession: db.prepare(`
-    INSERT INTO sessions (mode, total_cards, correct_count, new_letters_introduced)
-    VALUES (?, ?, 0, ?)
+    INSERT INTO sessions (child_id, mode, total_cards, correct_count, new_letters_introduced)
+    VALUES (?, ?, ?, 0, ?)
   `),
 
   completeSession: db.prepare(`
@@ -88,14 +88,14 @@ const stmts = {
 
   recentSessions: db.prepare(`
     SELECT * FROM sessions
-    WHERE mode = ? AND completed_at IS NOT NULL
+    WHERE child_id = ? AND mode = ? AND completed_at IS NOT NULL
     ORDER BY completed_at DESC
     LIMIT 5
   `),
 
   statusCounts: db.prepare(`
     SELECT status, COUNT(*) as c FROM progress
-    WHERE mode = ?
+    WHERE child_id = ? AND mode = ?
     GROUP BY status
   `),
 
@@ -103,14 +103,22 @@ const stmts = {
     SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
-    WHERE p.mode = ? AND p.recent_fails >= 2
+    WHERE p.child_id = ? AND p.mode = ? AND p.recent_fails >= 2
     ORDER BY p.recent_fails DESC
+  `),
+
+  allProgressForChild: db.prepare(`
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
+    FROM progress p
+    JOIN letters l ON l.id = p.letter_id
+    WHERE p.child_id = ? AND p.mode = ?
+    ORDER BY l.display_order
   `),
 };
 
 // ─── getSessionCards ────────────────────────────────────────────────
 
-export function getSessionCards(mode, count = 10) {
+export function getSessionCards(mode, childId, count = 10) {
   const d = today();
   const cards = [];
   const seen = new Set();
@@ -134,16 +142,16 @@ export function getSessionCards(mode, count = 10) {
   };
 
   // a. Problem letters (recent_fails >= 2, due)
-  addCards(stmts.problemLetters.all(mode, d), { is_problem: true });
+  addCards(stmts.problemLetters.all(childId, mode, d), { is_problem: true });
 
   // b. Learning letters due for review
-  addCards(stmts.dueLetters.all(mode, d), {});
+  addCards(stmts.dueLetters.all(childId, mode, d), {});
 
   // c. Check if we can introduce new letters
-  const learningCount = stmts.learningCount.get(mode).c;
+  const learningCount = stmts.learningCount.get(childId, mode).c;
 
   if (cards.length < count && learningCount < 7) {
-    const completedSessions = stmts.sessionCount.get(mode).c;
+    const completedSessions = stmts.sessionCount.get(childId, mode).c;
     let canIntroduce = false;
     let introCount = 0;
 
@@ -153,7 +161,7 @@ export function getSessionCards(mode, count = 10) {
       introCount = Math.min(4, count - cards.length);
     } else {
       // Check last session success rate >= 70%
-      const last = stmts.lastSession.get(mode);
+      const last = stmts.lastSession.get(childId, mode);
       if (last && last.total_cards > 0) {
         const rate = last.correct_count / last.total_cards;
         if (rate >= 0.7) {
@@ -164,20 +172,20 @@ export function getSessionCards(mode, count = 10) {
     }
 
     if (canIntroduce && introCount > 0) {
-      addCards(stmts.newLetters.all(mode, introCount), { is_new: true });
+      addCards(stmts.newLetters.all(childId, mode, introCount), { is_new: true });
     }
   }
 
   // e. Fill remaining with mastered letters (oldest reviewed first)
   if (cards.length < count) {
     const remaining = count - cards.length;
-    addCards(stmts.masteredLetters.all(mode, remaining), {});
+    addCards(stmts.masteredLetters.all(childId, mode, remaining), {});
   }
 
   // f. If still short, introduce more new letters to reach minimum of count
   if (cards.length < count) {
     const remaining = count - cards.length;
-    addCards(stmts.newLetters.all(mode, remaining + seen.size), { is_new: true });
+    addCards(stmts.newLetters.all(childId, mode, remaining + seen.size), { is_new: true });
   }
 
   // Shuffle cards so they're not always in the same order
@@ -188,7 +196,7 @@ export function getSessionCards(mode, count = 10) {
 
   // Create a session record
   const newLetterIds = cards.filter(c => c.is_new).map(c => c.letter_id).join(',');
-  const info = stmts.createSession.run(mode, cards.length, newLetterIds);
+  const info = stmts.createSession.run(childId, mode, cards.length, newLetterIds);
 
   return {
     session_id: info.lastInsertRowid,
@@ -198,9 +206,9 @@ export function getSessionCards(mode, count = 10) {
 
 // ─── gradeCard ──────────────────────────────────────────────────────
 
-export const gradeCard = db.transaction((letterId, mode, correct) => {
-  const row = stmts.getProgress.get(letterId, mode);
-  if (!row) throw new Error(`No progress for letter_id=${letterId}, mode=${mode}`);
+export const gradeCard = db.transaction((letterId, mode, childId, correct) => {
+  const row = stmts.getProgress.get(childId, letterId, mode);
+  if (!row) throw new Error(`No progress for child_id=${childId}, letter_id=${letterId}, mode=${mode}`);
 
   const isNew = row.introduced_date === null;
   let {
@@ -250,7 +258,7 @@ export const gradeCard = db.transaction((letterId, mode, correct) => {
     status, ease_factor, interval_days, repetitions,
     next_review_date, now(), times_failed, recent_fails,
     introduced_date,
-    letterId, mode,
+    childId, letterId, mode,
   );
 
   return {
@@ -274,17 +282,23 @@ export function completeSession(sessionId, totalCards, correctCount) {
 
 // ─── getProgress ────────────────────────────────────────────────────
 
-export function getProgress(mode) {
-  const countsRaw = stmts.statusCounts.all(mode);
+export function getProgress(mode, childId) {
+  const countsRaw = stmts.statusCounts.all(childId, mode);
   const counts = { mastered: 0, learning: 0, new: 0, problem: 0 };
   for (const row of countsRaw) {
     counts[row.status] = row.c;
   }
 
-  const problemLetters = stmts.problemList.all(mode);
+  const problemLetters = stmts.problemList.all(childId, mode);
   counts.problem = problemLetters.length;
 
-  const recentSessions = stmts.recentSessions.all(mode);
+  const recentSessions = stmts.recentSessions.all(childId, mode);
 
   return { counts, problemLetters, recentSessions };
+}
+
+// ─── getProgressLetters ─────────────────────────────────────────────
+
+export function getProgressLetters(mode, childId) {
+  return stmts.allProgressForChild.all(childId, mode);
 }

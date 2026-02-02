@@ -1,12 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import Home from '../pages/Home';
 
 function renderHome() {
   return render(
-    <MemoryRouter>
-      <Home />
+    <MemoryRouter initialEntries={['/child/1']}>
+      <Routes>
+        <Route path="/child/:childId" element={<Home />} />
+      </Routes>
     </MemoryRouter>
   );
 }

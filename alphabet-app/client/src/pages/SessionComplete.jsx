@@ -16,7 +16,7 @@ function FloatingEmoji({ emoji, style }) {
 }
 
 export default function SessionComplete({ muted }) {
-  const { mode } = useParams();
+  const { mode, childId } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
   const { sessionId, totalShown = 0, correctCount = 0, results = [], cards = [] } = state || {};
@@ -113,13 +113,13 @@ export default function SessionComplete({ muted }) {
       {/* Buttons */}
       <div className="w-full max-w-sm flex flex-col gap-4 mt-auto">
         <button
-          onClick={() => navigate(`/session/${mode}`)}
+          onClick={() => navigate(`/child/${childId}/session/${mode}`)}
           className="bg-indigo-500 active:bg-indigo-600 text-white rounded-2xl py-5 text-xl font-bold shadow-lg transition-transform active:scale-95"
         >
           Play Again
         </button>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate(`/child/${childId}`)}
           className="bg-white text-indigo-500 border-2 border-indigo-300 rounded-2xl py-4 text-xl font-bold active:bg-indigo-50 transition-transform active:scale-95"
         >
           Go Home

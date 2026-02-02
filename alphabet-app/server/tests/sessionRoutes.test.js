@@ -43,7 +43,7 @@ afterAll(async () => {
 
 describe('GET /api/session/start', () => {
   it('returns session_id and cards', async () => {
-    const { status, data } = await request('GET', '/api/session/start?mode=upper');
+    const { status, data } = await request('GET', '/api/session/start?mode=upper&child_id=1');
     expect(status).toBe(200);
     expect(data).toHaveProperty('session_id');
     expect(data).toHaveProperty('cards');
@@ -51,24 +51,25 @@ describe('GET /api/session/start', () => {
   });
 
   it('rejects invalid mode', async () => {
-    const { status } = await request('GET', '/api/session/start?mode=invalid');
+    const { status } = await request('GET', '/api/session/start?mode=invalid&child_id=1');
     expect(status).toBe(400);
   });
 
-  it('defaults to upper mode', async () => {
-    const { data } = await request('GET', '/api/session/start');
-    expect(data.cards[0].case_type).toBe('upper');
+  it('requires child_id', async () => {
+    const { status } = await request('GET', '/api/session/start?mode=upper');
+    expect(status).toBe(400);
   });
 });
 
 describe('POST /api/session/grade', () => {
   it('grades a card correctly', async () => {
-    const session = await request('GET', '/api/session/start?mode=upper');
+    const session = await request('GET', '/api/session/start?mode=upper&child_id=1');
     const card = session.data.cards[0];
 
     const { status, data } = await request('POST', '/api/session/grade', {
       letter_id: card.letter_id,
       mode: 'upper',
+      child_id: 1,
       correct: true,
     });
     expect(status).toBe(200);
@@ -86,6 +87,7 @@ describe('POST /api/session/grade', () => {
     const { status } = await request('POST', '/api/session/grade', {
       letter_id: 1,
       mode: 'bad',
+      child_id: 1,
       correct: true,
     });
     expect(status).toBe(400);
@@ -94,7 +96,7 @@ describe('POST /api/session/grade', () => {
 
 describe('POST /api/session/complete', () => {
   it('completes a session', async () => {
-    const session = await request('GET', '/api/session/start?mode=upper');
+    const session = await request('GET', '/api/session/start?mode=upper&child_id=1');
     const { status, data } = await request('POST', '/api/session/complete', {
       session_id: session.data.session_id,
       total_cards: 10,
@@ -114,7 +116,7 @@ describe('POST /api/session/complete', () => {
 
 describe('GET /api/progress', () => {
   it('returns progress summary', async () => {
-    const { status, data } = await request('GET', '/api/progress?mode=upper');
+    const { status, data } = await request('GET', '/api/progress?mode=upper&child_id=1');
     expect(status).toBe(200);
     expect(data).toHaveProperty('counts');
     expect(data).toHaveProperty('problemLetters');
@@ -124,7 +126,7 @@ describe('GET /api/progress', () => {
 
 describe('GET /api/progress/letters', () => {
   it('returns per-letter progress with display_word', async () => {
-    const { status, data } = await request('GET', '/api/progress/letters?mode=upper');
+    const { status, data } = await request('GET', '/api/progress/letters?mode=upper&child_id=1');
     expect(status).toBe(200);
     expect(data.length).toBe(26);
     expect(data[0]).toHaveProperty('character');

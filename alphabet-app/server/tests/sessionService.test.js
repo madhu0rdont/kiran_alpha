@@ -28,25 +28,25 @@ afterAll(() => {
 
 describe('getSessionCards', () => {
   it('returns a session_id and cards array', () => {
-    const result = getSessionCards('upper');
+    const result = getSessionCards('upper', 1);
     expect(result).toHaveProperty('session_id');
     expect(result).toHaveProperty('cards');
     expect(Array.isArray(result.cards)).toBe(true);
   });
 
   it('returns at least 10 cards for first session', () => {
-    const result = getSessionCards('upper');
+    const result = getSessionCards('upper', 1);
     expect(result.cards.length).toBeGreaterThanOrEqual(10);
   });
 
   it('first session cards include new letters', () => {
-    const result = getSessionCards('lower');
+    const result = getSessionCards('lower', 1);
     const newCards = result.cards.filter(c => c.is_new);
     expect(newCards.length).toBeGreaterThan(0);
   });
 
   it('cards have required fields', () => {
-    const result = getSessionCards('upper');
+    const result = getSessionCards('upper', 1);
     const card = result.cards[0];
     expect(card).toHaveProperty('letter_id');
     expect(card).toHaveProperty('character');
@@ -58,7 +58,7 @@ describe('getSessionCards', () => {
   });
 
   it('cards include display_word field', () => {
-    const result = getSessionCards('upper');
+    const result = getSessionCards('upper', 1);
     const card = result.cards[0];
     expect(card).toHaveProperty('display_word');
   });
@@ -67,7 +67,7 @@ describe('getSessionCards', () => {
     // Run multiple times and check if order varies
     const orders = [];
     for (let i = 0; i < 5; i++) {
-      const result = getSessionCards('both');
+      const result = getSessionCards('both', 1);
       orders.push(result.cards.map(c => c.letter_id).join(','));
     }
     const unique = new Set(orders);
@@ -81,12 +81,12 @@ describe('gradeCard', () => {
 
   beforeAll(() => {
     // Get a card to grade
-    const result = getSessionCards('upper');
+    const result = getSessionCards('upper', 1);
     card = result.cards[0];
   });
 
   it('correct answer increases repetitions', () => {
-    const result = gradeCard(card.letter_id, 'upper', true);
+    const result = gradeCard(card.letter_id, 'upper', 1, true);
     expect(result.correct).toBe(true);
     expect(result.repetitions).toBeGreaterThanOrEqual(1);
     expect(result.status).toMatch(/learning|mastered/);
@@ -94,49 +94,49 @@ describe('gradeCard', () => {
 
   it('correct answer sets interval to 1 day on first rep', () => {
     // Get a fresh new letter
-    const session = getSessionCards('both');
+    const session = getSessionCards('both', 1);
     const newCard = session.cards.find(c => c.is_new);
     if (!newCard) return; // skip if none new
-    const result = gradeCard(newCard.letter_id, 'both', true);
+    const result = gradeCard(newCard.letter_id, 'both', 1, true);
     expect(result.interval_days).toBe(1);
   });
 
   it('wrong answer resets repetitions to 0', () => {
-    const session = getSessionCards('lower');
+    const session = getSessionCards('lower', 1);
     const c = session.cards[0];
     // Grade correct first to set reps
-    gradeCard(c.letter_id, 'lower', true);
+    gradeCard(c.letter_id, 'lower', 1, true);
     // Then wrong
-    const result = gradeCard(c.letter_id, 'lower', false);
+    const result = gradeCard(c.letter_id, 'lower', 1, false);
     expect(result.repetitions).toBe(0);
     expect(result.interval_days).toBe(1);
     expect(result.correct).toBe(false);
   });
 
   it('wrong answer decreases ease factor', () => {
-    const session = getSessionCards('both');
+    const session = getSessionCards('both', 1);
     const c = session.cards[1];
-    const r1 = gradeCard(c.letter_id, 'both', true);
+    const r1 = gradeCard(c.letter_id, 'both', 1, true);
     const easeBefore = r1.ease_factor;
-    const r2 = gradeCard(c.letter_id, 'both', false);
+    const r2 = gradeCard(c.letter_id, 'both', 1, false);
     expect(r2.ease_factor).toBeLessThan(easeBefore);
   });
 
   it('ease factor does not go below 1.3', () => {
-    const session = getSessionCards('both');
+    const session = getSessionCards('both', 1);
     const c = session.cards[2];
     // Grade wrong many times
     for (let i = 0; i < 20; i++) {
-      gradeCard(c.letter_id, 'both', false);
+      gradeCard(c.letter_id, 'both', 1, false);
     }
-    const result = gradeCard(c.letter_id, 'both', false);
+    const result = gradeCard(c.letter_id, 'both', 1, false);
     expect(result.ease_factor).toBeGreaterThanOrEqual(1.3);
   });
 });
 
 describe('completeSession', () => {
   it('marks session as complete', () => {
-    const session = getSessionCards('upper');
+    const session = getSessionCards('upper', 1);
     const result = completeSession(session.session_id, 10, 8);
     expect(result).toHaveProperty('completed_at');
     expect(result.completed_at).not.toBeNull();
@@ -147,7 +147,7 @@ describe('completeSession', () => {
 
 describe('getProgress', () => {
   it('returns counts, problemLetters, and recentSessions', () => {
-    const result = getProgress('upper');
+    const result = getProgress('upper', 1);
     expect(result).toHaveProperty('counts');
     expect(result).toHaveProperty('problemLetters');
     expect(result).toHaveProperty('recentSessions');

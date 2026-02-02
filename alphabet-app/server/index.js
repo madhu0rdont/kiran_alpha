@@ -3,6 +3,7 @@ import cors from 'cors';
 import db from './db.js';
 import sessionRouter from './routes/session.js';
 import adminRouter from './routes/admin.js';
+import profileRouter from './routes/profiles.js';
 
 const app = express();
 app.use(cors());
@@ -28,6 +29,7 @@ app.get('/api/letters', (req, res) => {
 app.use('/api/session', sessionRouter);
 app.use('/api/progress', sessionRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/profiles', profileRouter);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

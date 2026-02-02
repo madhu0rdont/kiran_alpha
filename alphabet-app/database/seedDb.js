@@ -22,11 +22,19 @@ export function seedDb(db, { customWordsPath, imagesDir }) {
     return { skipped: true };
   }
 
+  // Ensure a default profile exists
+  const profileCount = db.prepare('SELECT COUNT(*) as c FROM profiles').get().c;
+  if (profileCount === 0) {
+    db.prepare("INSERT INTO profiles (name, avatar) VALUES ('Kiran', '🧒')").run();
+  }
+  const defaultProfile = db.prepare('SELECT id FROM profiles ORDER BY id LIMIT 1').get();
+  const childId = defaultProfile.id;
+
   const insertLetter = db.prepare(
     'INSERT INTO letters (character, case_type, image_name, display_order) VALUES (?, ?, ?, ?)'
   );
   const insertProgress = db.prepare(
-    'INSERT INTO progress (letter_id, mode) VALUES (?, ?)'
+    'INSERT INTO progress (child_id, letter_id, mode) VALUES (?, ?, ?)'
   );
 
   for (let i = 0; i < 26; i++) {
@@ -38,10 +46,10 @@ export function seedDb(db, { customWordsPath, imagesDir }) {
     const upperInfo = insertLetter.run(upper, 'upper', image, order);
     const lowerInfo = insertLetter.run(lower, 'lower', image, order);
 
-    insertProgress.run(upperInfo.lastInsertRowid, 'upper');
-    insertProgress.run(lowerInfo.lastInsertRowid, 'lower');
-    insertProgress.run(upperInfo.lastInsertRowid, 'both');
-    insertProgress.run(lowerInfo.lastInsertRowid, 'both');
+    insertProgress.run(childId, upperInfo.lastInsertRowid, 'upper');
+    insertProgress.run(childId, lowerInfo.lastInsertRowid, 'lower');
+    insertProgress.run(childId, upperInfo.lastInsertRowid, 'both');
+    insertProgress.run(childId, lowerInfo.lastInsertRowid, 'both');
   }
 
   // Restore custom display words from sidecar file
@@ -68,4 +76,25 @@ export function seedDb(db, { customWordsPath, imagesDir }) {
   }
 
   return { skipped: false, letters: 52, progress: 104, restoredWords, detectedImages };
+}
+
+/**
+ * Create progress rows for a new child profile.
+ * @param {object} db - better-sqlite3 database instance
+ * @param {number} childId - the profile id
+ */
+export function seedProgressForChild(db, childId) {
+  const letters = db.prepare('SELECT id FROM letters').all();
+  const insert = db.prepare('INSERT INTO progress (child_id, letter_id, mode) VALUES (?, ?, ?)');
+
+  for (const letter of letters) {
+    const caseType = db.prepare('SELECT case_type FROM letters WHERE id = ?').get(letter.id).case_type;
+    if (caseType === 'upper') {
+      insert.run(childId, letter.id, 'upper');
+      insert.run(childId, letter.id, 'both');
+    } else {
+      insert.run(childId, letter.id, 'lower');
+      insert.run(childId, letter.id, 'both');
+    }
+  }
 }

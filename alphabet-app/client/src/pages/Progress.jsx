@@ -85,7 +85,7 @@ function Stat({ label, value, color }) {
 }
 
 export default function Progress() {
-  const { mode: paramMode } = useParams();
+  const { mode: paramMode, childId } = useParams();
   const navigate = useNavigate();
   const [mode, setMode] = useState(paramMode || 'upper');
   const [data, setData] = useState(null);
@@ -96,8 +96,8 @@ export default function Progress() {
   useEffect(() => {
     let cancelled = false;
     Promise.all([
-      getProgress(mode),
-      getProgressLetters(mode),
+      getProgress(mode, childId),
+      getProgressLetters(mode, childId),
     ])
       .then(([summary, allProgress]) => {
         if (cancelled) return;
@@ -107,7 +107,7 @@ export default function Progress() {
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [mode]);
+  }, [mode, childId]);
 
   const handleTap = (letter, info) => {
     setSelected({ letter, info });
@@ -139,7 +139,7 @@ export default function Progress() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 px-6 py-8">
-      <button onClick={() => navigate('/')} className="text-indigo-500 text-lg mb-6 inline-block">&larr; Home</button>
+      <button onClick={() => navigate(`/child/${childId}`)} className="text-indigo-500 text-lg mb-6 inline-block">&larr; Home</button>
 
       <h1 className="text-3xl font-extrabold text-indigo-700 mb-6">Progress</h1>
 
@@ -148,7 +148,7 @@ export default function Progress() {
         {['upper', 'lower', 'both'].map(m => (
           <button
             key={m}
-            onClick={() => { setMode(m); navigate(`/progress/${m}`, { replace: true }); }}
+            onClick={() => { setMode(m); navigate(`/child/${childId}/progress/${m}`, { replace: true }); }}
             className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
               mode === m ? 'bg-indigo-500 text-white' : 'bg-white text-indigo-500 border border-indigo-300'
             }`}

@@ -25,6 +25,13 @@ export function createTestDb() {
   db.pragma('foreign_keys = ON');
 
   db.exec(`
+    CREATE TABLE profiles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      avatar TEXT DEFAULT '🧒',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE letters (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       character TEXT NOT NULL,
@@ -38,6 +45,7 @@ export function createTestDb() {
 
     CREATE TABLE progress (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      child_id INTEGER NOT NULL DEFAULT 1 REFERENCES profiles(id) ON DELETE CASCADE,
       letter_id INTEGER NOT NULL REFERENCES letters(id),
       mode TEXT NOT NULL CHECK (mode IN ('upper', 'lower', 'both')),
       status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'learning', 'mastered')),
@@ -49,11 +57,12 @@ export function createTestDb() {
       times_failed INTEGER NOT NULL DEFAULT 0,
       recent_fails INTEGER NOT NULL DEFAULT 0,
       introduced_date TEXT,
-      UNIQUE(letter_id, mode)
+      UNIQUE(child_id, letter_id, mode)
     );
 
     CREATE TABLE sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      child_id INTEGER NOT NULL DEFAULT 1 REFERENCES profiles(id) ON DELETE CASCADE,
       mode TEXT NOT NULL CHECK (mode IN ('upper', 'lower', 'both')),
       started_at TEXT NOT NULL DEFAULT (datetime('now')),
       completed_at TEXT,
@@ -64,15 +73,20 @@ export function createTestDb() {
 
     CREATE INDEX idx_progress_next_review ON progress(next_review_date);
     CREATE INDEX idx_progress_status ON progress(status);
+    CREATE INDEX idx_progress_child ON progress(child_id);
     CREATE INDEX idx_sessions_started ON sessions(started_at);
+    CREATE INDEX idx_sessions_child ON sessions(child_id);
   `);
+
+  // Create default profile
+  db.prepare("INSERT INTO profiles (name, avatar) VALUES ('Test', '🧒')").run();
 
   // Seed letters and progress
   const insertLetter = db.prepare(
     'INSERT INTO letters (character, case_type, image_name, display_order) VALUES (?, ?, ?, ?)'
   );
   const insertProgress = db.prepare(
-    'INSERT INTO progress (letter_id, mode) VALUES (?, ?)'
+    'INSERT INTO progress (child_id, letter_id, mode) VALUES (?, ?, ?)'
   );
 
   for (let i = 0; i < 26; i++) {
@@ -84,10 +98,10 @@ export function createTestDb() {
     const upperInfo = insertLetter.run(upper, 'upper', image, order);
     const lowerInfo = insertLetter.run(lower, 'lower', image, order);
 
-    insertProgress.run(upperInfo.lastInsertRowid, 'upper');
-    insertProgress.run(lowerInfo.lastInsertRowid, 'lower');
-    insertProgress.run(upperInfo.lastInsertRowid, 'both');
-    insertProgress.run(lowerInfo.lastInsertRowid, 'both');
+    insertProgress.run(1, upperInfo.lastInsertRowid, 'upper');
+    insertProgress.run(1, lowerInfo.lastInsertRowid, 'lower');
+    insertProgress.run(1, upperInfo.lastInsertRowid, 'both');
+    insertProgress.run(1, lowerInfo.lastInsertRowid, 'both');
   }
 
   db.close();

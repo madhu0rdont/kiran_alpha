@@ -20,9 +20,9 @@ function mockFetch(responseData, ok = true, status = 200) {
 describe('startSession', () => {
   it('calls GET /api/session/start with mode and count', async () => {
     mockFetch({ session_id: 1, cards: [] });
-    await api.startSession('upper', 10);
+    await api.startSession('upper', 1, 10);
     expect(fetch).toHaveBeenCalledWith(
-      '/api/session/start?mode=upper&count=10',
+      '/api/session/start?mode=upper&child_id=1&count=10',
       expect.objectContaining({ method: 'GET' })
     );
   });
@@ -31,12 +31,12 @@ describe('startSession', () => {
 describe('gradeCard', () => {
   it('calls POST /api/session/grade with body', async () => {
     mockFetch({ correct: true });
-    await api.gradeCard(1, 'upper', true);
+    await api.gradeCard(1, 'upper', 1, true);
     expect(fetch).toHaveBeenCalledWith(
       '/api/session/grade',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ letter_id: 1, mode: 'upper', correct: true }),
+        body: JSON.stringify({ letter_id: 1, mode: 'upper', child_id: 1, correct: true }),
       })
     );
   });
@@ -59,9 +59,9 @@ describe('completeSession', () => {
 describe('getProgress', () => {
   it('calls GET /api/progress with mode', async () => {
     mockFetch({ counts: {} });
-    await api.getProgress('lower');
+    await api.getProgress('lower', 1);
     expect(fetch).toHaveBeenCalledWith(
-      '/api/progress?mode=lower',
+      '/api/progress?mode=lower&child_id=1',
       expect.objectContaining({ method: 'GET' })
     );
   });
@@ -102,6 +102,6 @@ describe('uploadLetterImage', () => {
 describe('error handling', () => {
   it('throws on non-ok response', async () => {
     mockFetch({ error: 'Bad request' }, false, 400);
-    await expect(api.startSession('upper')).rejects.toThrow('Bad request');
+    await expect(api.startSession('upper', 1)).rejects.toThrow('Bad request');
   });
 });
