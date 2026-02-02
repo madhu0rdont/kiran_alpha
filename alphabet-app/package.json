@@ -9,7 +9,8 @@
     "db:seed": "cd database && npm run seed",
     "db:reset": "cd database && npm run reset",
     "lint": "cd server && npm run lint && cd ../client && npm run lint",
-    "test": "cd server && npm test && cd ../client && npm test",
+    "test": "cd database && npm test && cd ../server && npm test && cd ../client && npm test",
+    "test:db": "cd database && npm test",
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
     "install:all": "npm install && cd client && npm install && cd ../server && npm install && cd ../database && npm install"

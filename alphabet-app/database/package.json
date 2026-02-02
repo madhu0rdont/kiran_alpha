@@ -5,9 +5,13 @@
   "scripts": {
     "migrate": "node migrate.js",
     "seed": "node seed.js",
-    "reset": "rm -f alphabet.db alphabet.db-shm alphabet.db-wal && node migrate.js && node seed.js"
+    "reset": "rm -f alphabet.db alphabet.db-shm alphabet.db-wal && node migrate.js && node seed.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.18"
   }
 }
