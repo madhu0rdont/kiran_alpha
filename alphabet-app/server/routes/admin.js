@@ -8,6 +8,14 @@ import db from '../db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const IMAGES_DIR = path.join(__dirname, '..', '..', 'client', 'public', 'images', 'letters');
+const CUSTOM_WORDS_PATH = path.join(__dirname, '..', '..', 'database', 'custom-words.json');
+
+function saveCustomWords() {
+  const rows = db.prepare("SELECT character, display_word FROM letters WHERE case_type = 'upper' AND display_word IS NOT NULL").all();
+  const words = {};
+  for (const r of rows) words[r.character] = r.display_word;
+  fs.writeFileSync(CUSTOM_WORDS_PATH, JSON.stringify(words, null, 2));
+}
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 const router = Router();
@@ -54,6 +62,7 @@ router.put('/word/:letter', (req, res) => {
 
   try {
     db.prepare('UPDATE letters SET display_word = ? WHERE UPPER(character) = ?').run(value, letter);
+    saveCustomWords();
     res.json({ success: true, letter, display_word: value });
   } catch (err) {
     res.status(500).json({ error: err.message });

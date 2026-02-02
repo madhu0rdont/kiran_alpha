@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.join(__dirname, 'alphabet.db');
@@ -44,6 +45,31 @@ const seedLetters = db.transaction(() => {
     insertProgress.run(lowerInfo.lastInsertRowid, 'lower');
     insertProgress.run(upperInfo.lastInsertRowid, 'both');
     insertProgress.run(lowerInfo.lastInsertRowid, 'both');
+  }
+
+  // Restore custom display words from sidecar file
+  const wordsPath = path.join(__dirname, 'custom-words.json');
+  if (fs.existsSync(wordsPath)) {
+    const words = JSON.parse(fs.readFileSync(wordsPath, 'utf8'));
+    const entries = Object.entries(words);
+    for (const [letter, word] of entries) {
+      db.prepare('UPDATE letters SET display_word = ? WHERE UPPER(character) = ?').run(word, letter);
+    }
+    if (entries.length > 0) console.log(`Restored ${entries.length} custom word(s).`);
+  }
+
+  // Detect existing uploaded images and set has_image flag
+  const imagesDir = path.join(__dirname, '..', 'client', 'public', 'images', 'letters');
+  if (fs.existsSync(imagesDir)) {
+    let count = 0;
+    for (let i = 0; i < 26; i++) {
+      const letter = String.fromCharCode(65 + i);
+      if (fs.existsSync(path.join(imagesDir, `${letter}.png`))) {
+        db.prepare('UPDATE letters SET has_image = 1 WHERE UPPER(character) = ?').run(letter);
+        count++;
+      }
+    }
+    if (count > 0) console.log(`Detected ${count} existing image(s), set has_image flags.`);
   }
 
   console.log('Seeded 52 letters and 104 progress records.');
