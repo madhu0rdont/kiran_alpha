@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import db from '../db.js';
 import { getSessionCards, gradeCard, completeSession, getProgress } from '../services/sessionService.js';
 
 const router = Router();
@@ -56,6 +57,23 @@ router.get('/', (req, res) => {
 
   const result = getProgress(mode);
   res.json(result);
+});
+
+// GET /api/progress/letters?mode=upper|lower|both
+router.get('/letters', (req, res) => {
+  const mode = req.query.mode || 'upper';
+  if (!['upper', 'lower', 'both'].includes(mode)) {
+    return res.status(400).json({ error: 'mode must be upper, lower, or both' });
+  }
+
+  const rows = db.prepare(`
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order
+    FROM progress p
+    JOIN letters l ON l.id = p.letter_id
+    WHERE p.mode = ?
+    ORDER BY l.display_order
+  `).all(mode);
+  res.json(rows);
 });
 
 export default router;

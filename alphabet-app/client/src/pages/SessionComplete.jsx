@@ -1,12 +1,24 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { completeSession } from '../services/api';
 import { EMOJI_MAP } from '../lib/emojis';
+import { playCelebration } from '../lib/sounds';
 
-export default function SessionComplete() {
+const CELEBRATION_EMOJIS = ['⭐', '🌟', '✨', '🎉', '🥳', '💫', '🎊'];
+
+function FloatingEmoji({ emoji, style }) {
+  return (
+    <span className="absolute text-4xl animate-float-up pointer-events-none" style={style}>
+      {emoji}
+    </span>
+  );
+}
+
+export default function SessionComplete({ muted }) {
   const { mode } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
+  const [particles, setParticles] = useState([]);
 
   const { sessionId, totalShown = 0, correctCount = 0, results = [], cards = [] } = state || {};
   const pct = totalShown > 0 ? Math.round((correctCount / totalShown) * 100) : 0;
@@ -20,7 +32,23 @@ export default function SessionComplete() {
     if (sessionId) {
       completeSession(sessionId, totalShown, correctCount).catch(() => {});
     }
-  }, [sessionId, totalShown, correctCount]);
+    if (!muted) playCelebration();
+
+    // Spawn celebration particles
+    const items = [];
+    for (let i = 0; i < 12; i++) {
+      items.push({
+        id: i,
+        emoji: CELEBRATION_EMOJIS[i % CELEBRATION_EMOJIS.length],
+        style: {
+          left: `${10 + Math.random() * 80}%`,
+          top: `${30 + Math.random() * 40}%`,
+          animationDelay: `${i * 0.15}s`,
+        },
+      });
+    }
+    setParticles(items);
+  }, []);
 
   if (!state) {
     return (
@@ -32,12 +60,17 @@ export default function SessionComplete() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center px-6 py-10">
-      <h1 className="text-5xl font-extrabold text-indigo-700 mb-2">Great Job!</h1>
-      <span className="text-6xl mb-6">🎉</span>
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center px-6 py-10 relative overflow-hidden">
+      {/* Floating celebration */}
+      {particles.map(p => (
+        <FloatingEmoji key={p.id} emoji={p.emoji} style={p.style} />
+      ))}
+
+      <h1 className="text-5xl font-extrabold text-indigo-700 mb-2 animate-pop-in">Great Job!</h1>
+      <span className="text-6xl mb-6 animate-pop-in" style={{ animationDelay: '0.2s' }}>🎉</span>
 
       {/* Score */}
-      <div className="bg-white rounded-3xl shadow-lg px-8 py-6 w-full max-w-sm text-center mb-6">
+      <div className="bg-white rounded-3xl shadow-lg px-8 py-6 w-full max-w-sm text-center mb-6 animate-pop-in" style={{ animationDelay: '0.3s' }}>
         <p className="text-4xl font-bold text-indigo-600">{correctCount} / {totalShown}</p>
         <p className="text-lg text-gray-400 mt-1">{pct}% correct</p>
       </div>

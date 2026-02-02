@@ -38,3 +38,7 @@ export function completeSession(sessionId, totalCards, correctCount) {
 export function getProgress(mode) {
   return request('GET', `/progress?mode=${mode}`);
 }
+
+export function getProgressLetters(mode) {
+  return request('GET', `/progress/letters?mode=${mode}`);
+}
