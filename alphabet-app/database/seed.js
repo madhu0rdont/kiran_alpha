@@ -9,11 +9,11 @@ const db = new Database(dbPath);
 db.pragma('foreign_keys = ON');
 
 const IMAGE_NAMES = [
-  'apple', 'ball', 'cat', 'dog', 'elephant',
-  'fish', 'grape', 'hat', 'igloo', 'jar',
-  'kite', 'lion', 'moon', 'nest', 'orange',
-  'pig', 'queen', 'rain', 'sun', 'tree',
-  'umbrella', 'van', 'whale', 'xylophone', 'yak', 'zebra',
+  'anna', 'bam', 'chase', 'daniel', 'elmo',
+  'fuli', 'goofy', 'house', 'icecream', 'jj',
+  'kion', 'lightning', 'marshall', 'nemo', 'olaf',
+  'peppa', 'elsa', 'rubble', 'skye', 'thomas',
+  'umbrella', 'violin', 'watermelon', 'xylophone', 'yoyo', 'zuma',
 ];
 
 const seedLetters = db.transaction(() => {

@@ -172,6 +172,12 @@ export function getSessionCards(mode, count = 10) {
     addCards(stmts.masteredLetters.all(mode, remaining), {});
   }
 
+  // f. If still short, introduce more new letters to reach minimum of count
+  if (cards.length < count) {
+    const remaining = count - cards.length;
+    addCards(stmts.newLetters.all(mode, remaining + seen.size), { is_new: true });
+  }
+
   // Create a session record
   const newLetterIds = cards.filter(c => c.is_new).map(c => c.letter_id).join(',');
   const info = stmts.createSession.run(mode, cards.length, newLetterIds);
