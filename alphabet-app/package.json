@@ -8,6 +8,9 @@
     "db:migrate": "cd database && npm run migrate",
     "db:seed": "cd database && npm run seed",
     "db:reset": "cd database && npm run reset",
+    "test": "cd server && npm test && cd ../client && npm test",
+    "test:server": "cd server && npm test",
+    "test:client": "cd client && npm test",
     "install:all": "npm install && cd client && npm install && cd ../server && npm install && cd ../database && npm install"
   },
   "devDependencies": {
