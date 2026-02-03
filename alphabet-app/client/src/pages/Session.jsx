@@ -179,8 +179,18 @@ export default function Session({ muted, setMuted }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col px-6 py-6 select-none">
-      {/* Top bar: mute toggle */}
-      <div className="flex justify-end mb-2">
+      {/* Top bar: quit + mute */}
+      <div className="flex justify-between mb-2">
+        <button
+          onClick={() => {
+            if (confirm('Quit this session? Progress on ungraded cards will be lost.')) {
+              navigate(`/child/${childId}`);
+            }
+          }}
+          className="text-sm text-red-400 font-semibold active:text-red-600 p-2"
+        >
+          ✕ Quit
+        </button>
         <button
           onClick={() => setMuted(m => !m)}
           className="text-2xl opacity-60 active:opacity-100 p-2"
