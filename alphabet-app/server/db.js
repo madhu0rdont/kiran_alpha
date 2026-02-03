@@ -111,7 +111,41 @@ if (!tableExists) {
     insertProgress.run(1, lowerInfo.lastInsertRowid, 'both');
   }
 
-  console.log('Database initialized with 52 letters and 104 progress records.');
+  // Detect existing images in the build
+  const imagesDir = path.join(__dirname, '..', 'client', 'dist', 'images', 'letters');
+  const publicImagesDir = path.join(__dirname, '..', 'client', 'public', 'images', 'letters');
+  let detectedImages = 0;
+
+  for (let i = 0; i < 26; i++) {
+    const letter = String.fromCharCode(65 + i);
+    const inDist = fs.existsSync(path.join(imagesDir, `${letter}.png`));
+    const inPublic = fs.existsSync(path.join(publicImagesDir, `${letter}.png`));
+    if (inDist || inPublic) {
+      db.prepare('UPDATE letters SET has_image = 1 WHERE UPPER(character) = ?').run(letter);
+      detectedImages++;
+    }
+  }
+
+  console.log(`Database initialized with 52 letters, 104 progress records, and ${detectedImages} images detected.`);
+} else {
+  // On every startup, re-check for images (in case new images were deployed)
+  const imagesDir = path.join(__dirname, '..', 'client', 'dist', 'images', 'letters');
+  const publicImagesDir = path.join(__dirname, '..', 'client', 'public', 'images', 'letters');
+  let detectedImages = 0;
+
+  for (let i = 0; i < 26; i++) {
+    const letter = String.fromCharCode(65 + i);
+    const inDist = fs.existsSync(path.join(imagesDir, `${letter}.png`));
+    const inPublic = fs.existsSync(path.join(publicImagesDir, `${letter}.png`));
+    if (inDist || inPublic) {
+      db.prepare('UPDATE letters SET has_image = 1 WHERE UPPER(character) = ?').run(letter);
+      detectedImages++;
+    }
+  }
+
+  if (detectedImages > 0) {
+    console.log(`Detected ${detectedImages} letter images.`);
+  }
 }
 
 export default db;
