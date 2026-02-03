@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { fetchProfiles } from '../services/api';
 
 const modes = [
   { mode: 'both', label: 'ABC + abc', desc: 'Upper & lowercase', color: 'bg-blue-500 active:bg-blue-600' },
@@ -9,9 +11,43 @@ const modes = [
 export default function Home() {
   const navigate = useNavigate();
   const { childId } = useParams();
+  const [profiles, setProfiles] = useState([]);
+  const [showSwitcher, setShowSwitcher] = useState(false);
+
+  useEffect(() => {
+    fetchProfiles().then(setProfiles).catch(() => {});
+  }, [childId]);
+
+  const currentProfile = profiles.find(p => p.id === parseInt(childId, 10));
+  const childName = currentProfile?.name || '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center justify-center px-6 py-10">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center justify-center px-6 py-10 relative">
+      {childName && (
+        <div className="absolute top-6 left-6">
+          <button
+            onClick={() => setShowSwitcher(!showSwitcher)}
+            className="text-indigo-500 font-bold text-lg active:text-indigo-700"
+          >
+            {childName} ▾
+          </button>
+          {showSwitcher && (
+            <div className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-lg py-2 min-w-[140px] z-50">
+              {profiles.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => { setShowSwitcher(false); navigate(`/child/${p.id}`); }}
+                  className={`block w-full text-left px-4 py-2 text-sm font-medium ${
+                    p.id === parseInt(childId, 10) ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 active:bg-gray-100'
+                  }`}
+                >
+                  {p.avatar} {p.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <h1 className="text-5xl sm:text-6xl font-extrabold text-indigo-700 mb-2 tracking-tight">
         ABC Learning
       </h1>
@@ -37,12 +73,20 @@ export default function Home() {
         View Progress
       </button>
 
-      <button
-        onClick={() => navigate('/')}
-        className="mt-4 text-gray-400 text-sm font-medium active:text-gray-600"
-      >
-        Switch Child
-      </button>
+      <div className="mt-4 flex gap-4">
+        <button
+          onClick={() => navigate('/')}
+          className="text-gray-400 text-sm font-medium active:text-gray-600"
+        >
+          Switch Child
+        </button>
+        <button
+          onClick={() => navigate('/admin')}
+          className="text-gray-400 text-sm font-medium active:text-gray-600"
+        >
+          Admin
+        </button>
+      </div>
     </div>
   );
 }
