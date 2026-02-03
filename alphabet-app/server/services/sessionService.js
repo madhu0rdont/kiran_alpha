@@ -231,7 +231,10 @@ export const gradeCard = db.transaction((letterId, mode, childId, correct) => {
       interval_days = Math.round(interval_days * ease_factor);
     }
     ease_factor = Math.min(2.5, ease_factor + 0.1);
-    recent_fails = 0;
+    // Only clear recent_fails after 3 consecutive correct answers
+    if (repetitions >= 3) {
+      recent_fails = 0;
+    }
 
     if (repetitions >= 3 && interval_days >= 7) {
       status = 'mastered';
@@ -243,11 +246,6 @@ export const gradeCard = db.transaction((letterId, mode, childId, correct) => {
     times_failed += 1;
     recent_fails += 1;
     status = 'learning';
-  }
-
-  // Reset recent_fails counter after 5 attempts
-  if (recent_fails >= 5) {
-    recent_fails = 0;
   }
 
   const nextDate = new Date();
