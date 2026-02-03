@@ -125,13 +125,12 @@ function LetterCard({ letter, uploading, onUpload, onDelete, onWordUpdate }) {
           onKeyDown={e => { if (e.key === 'Enter') { onWordUpdate(char, editValue); setEditing(false); } }}
         />
       ) : (
-        <p
-          className="text-xs text-gray-400 mb-3 cursor-pointer hover:text-indigo-500"
+        <button
+          className="text-sm text-indigo-500 font-medium mb-3 cursor-pointer hover:text-indigo-700 bg-indigo-50 rounded-lg px-3 py-1"
           onClick={() => { setEditValue(word); setEditing(true); }}
-          title="Click to edit name"
         >
           {word} ✎
-        </p>
+        </button>
       )}
 
       <input
