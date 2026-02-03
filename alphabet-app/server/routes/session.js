@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getSessionCards, gradeCard, completeSession, getProgress, getProgressLetters } from '../services/sessionService.js';
+import { getSessionCards, gradeCard, completeSession, getProgress, getProgressLetters, resetProgress, deleteSession } from '../services/sessionService.js';
 
 const router = Router();
 
@@ -80,6 +80,37 @@ router.get('/letters', (req, res) => {
 
   const rows = getProgressLetters(mode, childId);
   res.json(rows);
+});
+
+// POST /api/progress/reset { mode, child_id }
+router.post('/reset', (req, res) => {
+  const { mode, child_id } = req.body;
+
+  if (!mode || !child_id) {
+    return res.status(400).json({ error: 'mode and child_id are required' });
+  }
+  if (!['upper', 'lower', 'both'].includes(mode)) {
+    return res.status(400).json({ error: 'mode must be upper, lower, or both' });
+  }
+
+  resetProgress(mode, child_id);
+  res.json({ success: true });
+});
+
+// DELETE /api/session/:id?child_id=1
+router.delete('/:id', (req, res) => {
+  const sessionId = parseInt(req.params.id, 10);
+  const childId = parseInt(req.query.child_id, 10);
+
+  if (!sessionId || !childId) {
+    return res.status(400).json({ error: 'session id and child_id are required' });
+  }
+
+  const deleted = deleteSession(sessionId, childId);
+  if (!deleted) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+  res.json({ success: true });
 });
 
 export default router;

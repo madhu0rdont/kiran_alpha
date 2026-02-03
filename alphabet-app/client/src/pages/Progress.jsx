@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProgress, getProgressLetters } from '../services/api';
+import { getProgress, getProgressLetters, resetProgress, deleteSession } from '../services/api';
 import { EMOJI_MAP, WORD_MAP } from '../lib/emojis';
 
 const LETTERS_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -113,6 +113,26 @@ export default function Progress() {
     setSelected({ letter, info });
   };
 
+  const reload = () => {
+    setLoading(true);
+    Promise.all([getProgress(mode, childId), getProgressLetters(mode, childId)])
+      .then(([summary, allProgress]) => { setData(summary); setProgressData(allProgress); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  const handleReset = async () => {
+    if (!confirm('Reset all progress for this mode? This will erase all session history and set every letter back to new.')) return;
+    await resetProgress(mode, childId);
+    reload();
+  };
+
+  const handleDeleteSession = async (sessionId) => {
+    if (!confirm('Delete this session from history?')) return;
+    await deleteSession(sessionId, childId);
+    reload();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex items-center justify-center">
@@ -166,6 +186,16 @@ export default function Progress() {
         <Stat label="Problem" value={counts.problem} color="text-red-500" />
       </div>
 
+      {/* Reset button */}
+      <div className="max-w-md mb-6">
+        <button
+          onClick={handleReset}
+          className="text-sm text-red-500 font-semibold bg-red-50 rounded-xl px-4 py-2 active:bg-red-100"
+        >
+          Reset Progress
+        </button>
+      </div>
+
       {/* Problem letters callout */}
       {problemLetters.length > 0 && (
         <div className="bg-orange-50 rounded-2xl px-4 py-3 mb-6 max-w-md">
@@ -212,6 +242,11 @@ export default function Progress() {
                   <span className="text-gray-600 text-sm">{date}</span>
                   <span className="font-bold text-indigo-600">{pct}%</span>
                   <span className="text-xs text-gray-400">{s.correct_count}/{s.total_cards}</span>
+                  <button
+                    onClick={() => handleDeleteSession(s.id)}
+                    className="text-red-400 text-sm font-bold ml-2 active:text-red-600"
+                    title="Delete session"
+                  >✕</button>
                 </div>
               );
             })}

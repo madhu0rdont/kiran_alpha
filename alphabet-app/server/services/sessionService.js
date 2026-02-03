@@ -295,6 +295,27 @@ export function getProgress(mode, childId) {
   return { counts, problemLetters, recentSessions };
 }
 
+// ─── resetProgress ──────────────────────────────────────────────────
+
+export function resetProgress(mode, childId) {
+  db.prepare(`
+    UPDATE progress
+    SET status = 'new', ease_factor = 2.5, interval_days = 1, repetitions = 0,
+        next_review_date = NULL, last_reviewed = NULL, times_failed = 0,
+        recent_fails = 0, introduced_date = NULL
+    WHERE child_id = ? AND mode = ?
+  `).run(childId, mode);
+
+  db.prepare('DELETE FROM sessions WHERE child_id = ? AND mode = ?').run(childId, mode);
+}
+
+// ─── deleteSession ──────────────────────────────────────────────────
+
+export function deleteSession(sessionId, childId) {
+  const result = db.prepare('DELETE FROM sessions WHERE id = ? AND child_id = ?').run(sessionId, childId);
+  return result.changes > 0;
+}
+
 // ─── getProgressLetters ─────────────────────────────────────────────
 
 export function getProgressLetters(mode, childId) {

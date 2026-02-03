@@ -66,6 +66,14 @@ export function getProgressLetters(mode, childId) {
   return request('GET', `/progress/letters?mode=${mode}&child_id=${childId}`);
 }
 
+export function resetProgress(mode, childId) {
+  return request('POST', '/progress/reset', { mode, child_id: childId });
+}
+
+export function deleteSession(sessionId, childId) {
+  return request('DELETE', `/session/${sessionId}?child_id=${childId}`);
+}
+
 // ─── Admin ────────────────────────────────────────────────────────
 
 export function getAdminLetters() {
