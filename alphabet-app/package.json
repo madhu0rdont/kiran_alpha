@@ -21,6 +21,9 @@
     "test:e2e": "npx playwright test",
     "install:all": "npm install && cd client && npm install && cd ../server && npm install && cd ../database && npm install"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "@playwright/test": "^1.58.1",
     "concurrently": "^9.1.0"
