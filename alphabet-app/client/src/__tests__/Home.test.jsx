@@ -1,7 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import Home from '../pages/Home';
+
+vi.mock('../services/api', () => ({
+  fetchProfiles: vi.fn().mockResolvedValue([
+    { id: 1, name: 'Kiran', avatar: '🧒' },
+  ]),
+}));
 
 function renderHome() {
   return render(
@@ -36,5 +42,15 @@ describe('Home', () => {
   it('renders progress link', () => {
     renderHome();
     expect(screen.getByText('View Progress')).toBeInTheDocument();
+  });
+
+  it('renders admin link', () => {
+    renderHome();
+    expect(screen.getByText('Admin')).toBeInTheDocument();
+  });
+
+  it('renders switch child link', () => {
+    renderHome();
+    expect(screen.getByText('Switch Child')).toBeInTheDocument();
   });
 });

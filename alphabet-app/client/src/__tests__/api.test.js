@@ -99,6 +99,31 @@ describe('uploadLetterImage', () => {
   });
 });
 
+describe('resetProgress', () => {
+  it('calls POST /api/progress/reset with mode and child_id', async () => {
+    mockFetch({ success: true });
+    await api.resetProgress('upper', 1);
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/progress/reset',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ mode: 'upper', child_id: 1 }),
+      })
+    );
+  });
+});
+
+describe('deleteSession', () => {
+  it('calls DELETE /api/session/:id with child_id', async () => {
+    mockFetch({ success: true });
+    await api.deleteSession(5, 1);
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/session/5?child_id=1',
+      expect.objectContaining({ method: 'DELETE' })
+    );
+  });
+});
+
 describe('error handling', () => {
   it('throws on non-ok response', async () => {
     mockFetch({ error: 'Bad request' }, false, 400);

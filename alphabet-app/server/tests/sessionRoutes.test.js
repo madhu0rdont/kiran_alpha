@@ -134,3 +134,62 @@ describe('GET /api/progress/letters', () => {
     expect(data[0]).toHaveProperty('has_image');
   });
 });
+
+describe('POST /api/progress/reset', () => {
+  it('resets all progress for a mode', async () => {
+    // First grade a card to create some progress
+    const session = await request('GET', '/api/session/start?mode=upper&child_id=1');
+    const card = session.data.cards[0];
+    await request('POST', '/api/session/grade', {
+      letter_id: card.letter_id,
+      mode: 'upper',
+      child_id: 1,
+      correct: true,
+    });
+
+    // Reset progress
+    const { status, data } = await request('POST', '/api/progress/reset', {
+      mode: 'upper',
+      child_id: 1,
+    });
+    expect(status).toBe(200);
+    expect(data.success).toBe(true);
+
+    // Verify progress was reset
+    const progress = await request('GET', '/api/progress/letters?mode=upper&child_id=1');
+    const allNew = progress.data.every(p => p.status === 'new');
+    expect(allNew).toBe(true);
+  });
+
+  it('requires mode and child_id', async () => {
+    const { status } = await request('POST', '/api/progress/reset', {});
+    expect(status).toBe(400);
+  });
+});
+
+describe('DELETE /api/session/:id', () => {
+  it('deletes a session', async () => {
+    // Create and complete a session
+    const session = await request('GET', '/api/session/start?mode=upper&child_id=1');
+    await request('POST', '/api/session/complete', {
+      session_id: session.data.session_id,
+      total_cards: 10,
+      correct_count: 8,
+    });
+
+    // Delete it
+    const { status, data } = await request('DELETE', `/api/session/${session.data.session_id}?child_id=1`);
+    expect(status).toBe(200);
+    expect(data.success).toBe(true);
+  });
+
+  it('returns 404 for non-existent session', async () => {
+    const { status } = await request('DELETE', '/api/session/99999?child_id=1');
+    expect(status).toBe(404);
+  });
+
+  it('requires child_id', async () => {
+    const { status } = await request('DELETE', '/api/session/1');
+    expect(status).toBe(400);
+  });
+});

@@ -151,4 +151,26 @@ describe('Session', () => {
       expect(screen.getByText('✗')).toBeInTheDocument();
     });
   });
+
+  it('renders quit button', async () => {
+    startSession.mockResolvedValue({
+      session_id: 1,
+      cards: [
+        {
+          letter_id: 1,
+          character: 'D',
+          case_type: 'upper',
+          image_name: 'daniel',
+          has_image: false,
+          display_word: null,
+          is_new: false,
+          is_problem: false,
+        },
+      ],
+    });
+    renderSession();
+    await waitFor(() => {
+      expect(screen.getByText(/Quit/)).toBeInTheDocument();
+    });
+  });
 });
