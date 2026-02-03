@@ -21,6 +21,7 @@ export default function Session({ muted, setMuted }) {
   const [cardAnim, setCardAnim] = useState('animate-slide-in');
   const [feedbackAnim, setFeedbackAnim] = useState('');
   const [animKey, setAnimKey] = useState(0);
+  const [confetti, setConfetti] = useState([]);
 
   useEffect(() => {
     startSession(mode, childId)
@@ -53,6 +54,19 @@ export default function Session({ muted, setMuted }) {
   const card = queue[currentIndex];
   const retryCount = queue.length - currentIndex - 1;
 
+  const spawnConfetti = () => {
+    const colors = ['#f43f5e', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#f97316'];
+    const pieces = Array.from({ length: 30 }, (_, i) => ({
+      id: Date.now() + i,
+      left: Math.random() * 100,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      delay: Math.random() * 0.3,
+      size: 8 + Math.random() * 8,
+    }));
+    setConfetti(pieces);
+    setTimeout(() => setConfetti([]), 2500);
+  };
+
   // Auto-speak letter and word when card changes
   useEffect(() => {
     if (!muted && card) {
@@ -77,13 +91,17 @@ export default function Session({ muted, setMuted }) {
     if (grading || !card) return;
     setGrading(true);
 
-    // Sound
+    // Sound + confetti
     if (!muted) {
       correct ? playCorrect() : playWrong();
     }
+    if (correct) {
+      spawnConfetti();
+    }
 
-    // Feedback animation
+    // Feedback animation + slide out
     setFeedbackAnim(correct ? 'animate-flash-green' : 'animate-shake');
+    setCardAnim('animate-slide-out');
 
     try {
       await gradeCard(card.letter_id, mode, childId, correct);
@@ -178,7 +196,23 @@ export default function Session({ muted, setMuted }) {
   const progressPct = queue.length > 0 ? Math.min(100, (currentIndex / queue.length) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col px-6 py-6 select-none">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col px-6 py-6 select-none overflow-hidden">
+      {/* Confetti */}
+      {confetti.map(p => (
+        <div
+          key={p.id}
+          className="confetti-piece"
+          style={{
+            left: `${p.left}%`,
+            backgroundColor: p.color,
+            width: p.size,
+            height: p.size,
+            animationDelay: `${p.delay}s`,
+            borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+          }}
+        />
+      ))}
+
       {/* Top bar: quit + mute */}
       <div className="flex justify-between mb-2">
         <button
