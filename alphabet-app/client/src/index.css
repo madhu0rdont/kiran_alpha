@@ -27,9 +27,7 @@ body {
   background-size: 400px 200px;
   animation: wave-drift 8s linear infinite;
   pointer-events: none;
-}
-.bg-pattern > * {
-  position: relative;
+  z-index: -1;
 }
 
 @keyframes slide-in {
