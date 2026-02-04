@@ -57,7 +57,7 @@ export default function SessionComplete({ muted }) {
 
   if (!state) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex flex-col items-center justify-center p-6">
         <p className="text-xl text-gray-500 mb-4">No session data found.</p>
         <button onClick={() => navigate('/')} className="text-indigo-500 underline text-lg">Go Home</button>
       </div>
@@ -65,7 +65,7 @@ export default function SessionComplete({ muted }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center px-6 py-10 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex flex-col items-center px-6 py-10 relative overflow-hidden">
       {/* Floating celebration */}
       {particles.map(p => (
         <FloatingEmoji key={p.id} emoji={p.emoji} style={p.style} />

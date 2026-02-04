@@ -102,7 +102,7 @@ function LetterCard({ letter, uploading, onUpload, onDelete, onWordUpdate }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center">
+    <div className="bg-white rounded-2xl shadow-lg p-4 flex flex-col items-center">
       <span className="text-3xl font-bold text-indigo-600 mb-2">{char}</span>
 
       {letter.has_image ? (
@@ -145,14 +145,14 @@ function LetterCard({ letter, uploading, onUpload, onDelete, onWordUpdate }) {
         <button
           onClick={() => fileRef.current?.click()}
           disabled={uploading}
-          className="flex-1 bg-indigo-500 text-white text-xs font-semibold rounded-lg py-2 active:bg-indigo-600 disabled:opacity-50"
+          className="flex-1 bg-indigo-500 text-white text-xs font-semibold rounded-xl py-2 active:bg-indigo-600 disabled:opacity-50"
         >
           {uploading ? '...' : letter.has_image ? 'Replace' : 'Upload'}
         </button>
         {letter.has_image && (
           <button
             onClick={() => onDelete(char)}
-            className="bg-red-100 text-red-600 text-xs font-semibold rounded-lg px-3 py-2 active:bg-red-200"
+            className="bg-red-100 text-red-600 text-xs font-semibold rounded-xl px-3 py-2 active:bg-red-200"
           >
             Remove
           </button>

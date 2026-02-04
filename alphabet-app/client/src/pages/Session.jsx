@@ -147,7 +147,7 @@ export default function Session({ muted, setMuted }) {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block w-12 h-12 border-4 border-indigo-300 border-t-indigo-600 rounded-full animate-spin mb-4" />
           <p className="text-2xl text-indigo-400">Loading cards...</p>
@@ -159,7 +159,7 @@ export default function Session({ muted, setMuted }) {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center justify-center px-6">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex flex-col items-center justify-center px-6">
         <p className="text-5xl mb-4">😕</p>
         <p className="text-xl text-red-500 text-center mb-6">{error}</p>
         <button
@@ -175,7 +175,7 @@ export default function Session({ muted, setMuted }) {
   // No cards due
   if (!card && currentIndex === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center justify-center px-6">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex flex-col items-center justify-center px-6">
         <p className="text-6xl mb-4">🎉</p>
         <h2 className="text-3xl font-bold text-indigo-700 mb-2 text-center">All caught up!</h2>
         <p className="text-lg text-indigo-400 mb-8 text-center">Come back tomorrow for more practice.</p>
@@ -197,7 +197,7 @@ export default function Session({ muted, setMuted }) {
   const progressPct = queue.length > 0 ? Math.min(100, (currentIndex / queue.length) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col px-6 py-6 select-none overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex flex-col px-6 py-6 select-none overflow-hidden">
       {/* Confetti */}
       {confetti.map(p => (
         <div

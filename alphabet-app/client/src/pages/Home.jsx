@@ -22,7 +22,7 @@ export default function Home() {
   const childName = currentProfile?.name || '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center justify-center px-6 py-10 relative">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex flex-col items-center justify-center px-6 py-10 relative">
       {childName && (
         <div className="absolute top-6 left-6">
           <button
@@ -32,7 +32,7 @@ export default function Home() {
             {childName} ▾
           </button>
           {showSwitcher && (
-            <div className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-lg py-2 min-w-[140px] z-50">
+            <div className="absolute top-full left-0 mt-1 bg-white rounded-2xl shadow-lg py-2 min-w-[140px] z-50">
               {profiles.map(p => (
                 <button
                   key={p.id}

@@ -43,14 +43,14 @@ export default function ProfileSelect() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex items-center justify-center">
         <div className="inline-block w-12 h-12 border-4 border-indigo-300 border-t-indigo-600 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex flex-col items-center px-6 py-10">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex flex-col items-center px-6 py-10">
       <h1 className="text-5xl sm:text-6xl font-extrabold text-indigo-700 mb-2 tracking-tight">
         ABC Learning
       </h1>
@@ -131,13 +131,13 @@ export default function ProfileSelect() {
               <button
                 onClick={handleAdd}
                 disabled={!newName.trim()}
-                className="flex-1 bg-indigo-500 text-white rounded-xl py-3 font-bold active:bg-indigo-600 disabled:opacity-50"
+                className="flex-1 bg-indigo-500 text-white rounded-2xl py-3 font-bold active:bg-indigo-600 disabled:opacity-50"
               >
                 Add
               </button>
               <button
                 onClick={() => { setAdding(false); setNewName(''); }}
-                className="flex-1 bg-gray-200 text-gray-600 rounded-xl py-3 font-bold active:bg-gray-300"
+                className="flex-1 bg-gray-200 text-gray-600 rounded-2xl py-3 font-bold active:bg-gray-300"
               >
                 Cancel
               </button>

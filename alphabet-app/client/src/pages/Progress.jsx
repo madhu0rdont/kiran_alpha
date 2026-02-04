@@ -77,7 +77,7 @@ function Row({ label, value }) {
 
 function Stat({ label, value, color }) {
   return (
-    <div className="bg-white rounded-2xl px-4 py-3 shadow-sm">
+    <div className="bg-white rounded-3xl px-4 py-3 shadow-lg">
       <p className="text-xs text-gray-400 uppercase tracking-wide">{label}</p>
       <p className={`text-2xl font-bold ${color}`}>{value}</p>
     </div>
@@ -135,7 +135,7 @@ export default function Progress() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex items-center justify-center">
         <div className="inline-block w-12 h-12 border-4 border-indigo-300 border-t-indigo-600 rounded-full animate-spin" />
       </div>
     );
@@ -158,7 +158,7 @@ export default function Progress() {
   const totalLetters = mode === 'both' ? 52 : 26;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 px-6 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern px-6 py-8">
       <button onClick={() => navigate(`/child/${childId}`)} className="text-indigo-500 text-lg mb-6 inline-block">&larr; Home</button>
 
       <h1 className="text-3xl font-extrabold text-indigo-700 mb-6">Progress</h1>
