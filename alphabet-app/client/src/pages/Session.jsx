@@ -62,6 +62,7 @@ export default function Session({ muted, setMuted }) {
       color: colors[Math.floor(Math.random() * colors.length)],
       delay: Math.random() * 0.3,
       size: 8 + Math.random() * 8,
+      shape: Math.random() > 0.5 ? '50%' : '2px',
     }));
     setConfetti(pieces);
     setTimeout(() => setConfetti([]), 2500);
@@ -141,7 +142,7 @@ export default function Session({ muted, setMuted }) {
       setCurrentIndex(nextIndex);
       setGrading(false);
     }, 350);
-  }, [card, currentIndex, queue, mode, muted, grading, results, totalShown, correctCount, finishSession]);
+  }, [card, currentIndex, queue, mode, muted, grading, results, totalShown, correctCount, finishSession, childId]);
 
   // Loading state
   if (loading) {
@@ -208,7 +209,7 @@ export default function Session({ muted, setMuted }) {
             width: p.size,
             height: p.size,
             animationDelay: `${p.delay}s`,
-            borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+            borderRadius: p.shape,
           }}
         />
       ))}
