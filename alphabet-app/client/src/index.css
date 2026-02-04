@@ -8,7 +8,7 @@ body {
 /* Animated wave pattern overlay for main pages */
 @keyframes wave-drift {
   0% { background-position: 0 bottom; }
-  100% { background-position: 1440px bottom; }
+  100% { background-position: 400px bottom; }
 }
 .bg-pattern {
   position: relative;
@@ -21,11 +21,11 @@ body {
   right: 0;
   bottom: 0;
   height: 200px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%236366f1' fill-opacity='0.12' d='M0,160L48,170.7C96,181,192,203,288,192C384,181,480,139,576,128C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 100' preserveAspectRatio='none'%3E%3Cpath fill='%236366f1' fill-opacity='0.12' d='M0,50 C100,20 100,80 200,50 C300,20 300,80 400,50 L400,100 L0,100 Z'/%3E%3C/svg%3E");
   background-repeat: repeat-x;
   background-position: 0 bottom;
-  background-size: 1440px 200px;
-  animation: wave-drift 25s linear infinite;
+  background-size: 400px 200px;
+  animation: wave-drift 8s linear infinite;
   pointer-events: none;
 }
 .bg-pattern > * {
