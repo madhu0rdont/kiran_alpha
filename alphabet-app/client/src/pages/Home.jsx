@@ -24,7 +24,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern flex flex-col items-center justify-center px-6 py-10 relative">
       {childName && (
-        <div className="absolute top-6 left-6">
+        <div className="absolute top-6 left-6 z-10">
           <button
             onClick={() => setShowSwitcher(!showSwitcher)}
             className="text-indigo-500 font-bold text-lg active:text-indigo-700"
@@ -48,12 +48,12 @@ export default function Home() {
           )}
         </div>
       )}
-      <h1 className="text-5xl sm:text-6xl font-extrabold text-indigo-700 mb-2 tracking-tight">
+      <h1 className="text-5xl sm:text-6xl font-extrabold text-indigo-700 mb-2 tracking-tight relative z-10">
         ABC Learning
       </h1>
-      <p className="text-xl text-indigo-400 mb-10">Tap to start learning!</p>
+      <p className="text-xl text-indigo-400 mb-10 relative z-10">Tap to start learning!</p>
 
-      <div className="w-full max-w-sm flex flex-col gap-5">
+      <div className="w-full max-w-sm flex flex-col gap-5 relative z-10">
         {modes.map(({ mode, label, desc, color }) => (
           <button
             key={mode}
@@ -68,12 +68,12 @@ export default function Home() {
 
       <button
         onClick={() => navigate(`/child/${childId}/progress/upper`)}
-        className="mt-10 text-indigo-500 text-lg font-semibold underline underline-offset-4 active:text-indigo-700"
+        className="mt-10 text-indigo-500 text-lg font-semibold underline underline-offset-4 active:text-indigo-700 relative z-10"
       >
         View Progress
       </button>
 
-      <div className="mt-4 flex gap-4">
+      <div className="mt-4 flex gap-4 relative z-10">
         <button
           onClick={() => navigate('/')}
           className="text-gray-400 text-sm font-medium active:text-gray-600"

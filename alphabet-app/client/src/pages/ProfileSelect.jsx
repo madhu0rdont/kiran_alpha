@@ -56,7 +56,7 @@ export default function ProfileSelect() {
       </h1>
       <p className="text-xl text-indigo-400 mb-10">Who's learning today?</p>
 
-      <div className="w-full max-w-sm flex flex-col gap-4">
+      <div className="w-full max-w-sm flex flex-col gap-4 z-content">
         {profiles.map(profile => (
           <div key={profile.id} className="relative">
             {editing === profile.id ? (

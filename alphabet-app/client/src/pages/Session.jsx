@@ -295,7 +295,7 @@ export default function Session({ muted, setMuted }) {
       </div>
 
       {/* Grade buttons */}
-      <div className="w-full max-w-md mx-auto flex gap-4 mt-6 pb-6">
+      <div className="w-full max-w-md mx-auto flex gap-4 mt-6 pb-6 z-content">
         <button
           onClick={() => handleGrade(true)}
           disabled={grading}

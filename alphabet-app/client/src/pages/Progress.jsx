@@ -159,12 +159,12 @@ export default function Progress() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-100 to-indigo-100 bg-pattern px-6 py-8">
-      <button onClick={() => navigate(`/child/${childId}`)} className="text-indigo-500 text-lg mb-6 inline-block">&larr; Home</button>
+      <button onClick={() => navigate(`/child/${childId}`)} className="text-indigo-500 text-lg mb-6 inline-block z-content">&larr; Home</button>
 
       <h1 className="text-3xl font-extrabold text-indigo-700 mb-6">Progress</h1>
 
       {/* Mode tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 z-content">
         {['upper', 'lower', 'both'].map(m => (
           <button
             key={m}
@@ -187,7 +187,7 @@ export default function Progress() {
       </div>
 
       {/* Reset button */}
-      <div className="max-w-md mb-6">
+      <div className="max-w-md mb-6 z-content">
         <button
           onClick={handleReset}
           className="text-sm text-red-500 font-semibold bg-red-50 rounded-xl px-4 py-2 active:bg-red-100"

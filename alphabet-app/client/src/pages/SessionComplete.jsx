@@ -111,7 +111,7 @@ export default function SessionComplete({ muted }) {
       )}
 
       {/* Buttons */}
-      <div className="w-full max-w-sm flex flex-col gap-4 mt-auto">
+      <div className="w-full max-w-sm flex flex-col gap-4 mt-auto z-content">
         <button
           onClick={() => navigate(`/child/${childId}/session/${mode}`)}
           className="bg-indigo-500 text-white rounded-2xl py-5 text-xl font-bold btn-tactile transition-all"
