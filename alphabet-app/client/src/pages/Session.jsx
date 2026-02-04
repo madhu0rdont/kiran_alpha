@@ -299,14 +299,14 @@ export default function Session({ muted, setMuted }) {
         <button
           onClick={() => handleGrade(true)}
           disabled={grading}
-          className="flex-1 bg-green-500 active:bg-green-600 text-white rounded-2xl py-5 text-4xl font-bold shadow-lg transition-transform active:scale-95 disabled:opacity-50"
+          className="flex-1 bg-green-500 text-white rounded-2xl py-5 text-4xl font-bold btn-grade transition-all disabled:opacity-50"
         >
           ✓
         </button>
         <button
           onClick={() => handleGrade(false)}
           disabled={grading}
-          className="flex-1 bg-red-500 active:bg-red-600 text-white rounded-2xl py-5 text-4xl font-bold shadow-lg transition-transform active:scale-95 disabled:opacity-50"
+          className="flex-1 bg-red-500 text-white rounded-2xl py-5 text-4xl font-bold btn-grade transition-all disabled:opacity-50"
         >
           ✗
         </button>

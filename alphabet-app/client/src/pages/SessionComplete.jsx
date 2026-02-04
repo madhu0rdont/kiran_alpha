@@ -114,7 +114,7 @@ export default function SessionComplete({ muted }) {
       <div className="w-full max-w-sm flex flex-col gap-4 mt-auto">
         <button
           onClick={() => navigate(`/child/${childId}/session/${mode}`)}
-          className="bg-indigo-500 active:bg-indigo-600 text-white rounded-2xl py-5 text-xl font-bold shadow-lg transition-transform active:scale-95"
+          className="bg-indigo-500 text-white rounded-2xl py-5 text-xl font-bold btn-tactile transition-all"
         >
           Play Again
         </button>

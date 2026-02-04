@@ -85,7 +85,7 @@ export default function ProfileSelect() {
             ) : (
               <button
                 onClick={() => navigate(`/child/${profile.id}`)}
-                className="w-full bg-white rounded-3xl shadow-lg py-5 px-6 flex items-center gap-4 transition-transform active:scale-95"
+                className="w-full bg-white rounded-3xl py-5 px-6 flex items-center gap-4 btn-tactile transition-all"
               >
                 <span className="text-5xl">{profile.avatar}</span>
                 <span className="text-2xl font-bold text-indigo-700">{profile.name}</span>

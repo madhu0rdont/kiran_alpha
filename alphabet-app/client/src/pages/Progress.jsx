@@ -57,7 +57,7 @@ function LetterDetail({ letter, info, onClose }) {
         </div>
         <button
           onClick={onClose}
-          className="mt-5 w-full bg-indigo-500 text-white rounded-xl py-3 font-bold active:bg-indigo-600"
+          className="mt-5 w-full bg-indigo-500 text-white rounded-xl py-3 font-bold btn-tactile transition-all"
         >
           Close
         </button>

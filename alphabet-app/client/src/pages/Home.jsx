@@ -58,7 +58,7 @@ export default function Home() {
           <button
             key={mode}
             onClick={() => navigate(`/child/${childId}/session/${mode}`)}
-            className={`${color} text-white rounded-3xl py-6 px-8 text-center shadow-lg transition-transform active:scale-95`}
+            className={`${color} text-white rounded-3xl py-6 px-8 text-center btn-tactile transition-all`}
           >
             <span className="block text-3xl font-bold">{label}</span>
             <span className="block text-base opacity-90 mt-1">{desc}</span>
