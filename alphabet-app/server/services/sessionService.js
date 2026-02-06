@@ -47,6 +47,16 @@ const stmts = {
     LIMIT ?
   `),
 
+  // Fallback: any learning letters (even if not due) for extra practice
+  learningLettersAny: db.prepare(`
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
+    FROM progress p
+    JOIN letters l ON l.id = p.letter_id
+    WHERE p.child_id = ? AND p.mode = ? AND p.status = 'learning'
+    ORDER BY p.next_review_date ASC
+    LIMIT ?
+  `),
+
   lastSession: db.prepare(`
     SELECT * FROM sessions
     WHERE child_id = ? AND mode = ? AND completed_at IS NOT NULL
@@ -186,6 +196,12 @@ export function getSessionCards(mode, childId, count = 10) {
   if (cards.length < count) {
     const remaining = count - cards.length;
     addCards(stmts.newLetters.all(childId, mode, remaining + seen.size), { is_new: true });
+  }
+
+  // g. Fallback: if still empty, get any learning letters for extra practice (even if not due)
+  if (cards.length < count) {
+    const remaining = count - cards.length;
+    addCards(stmts.learningLettersAny.all(childId, mode, remaining + seen.size), {});
   }
 
   // Shuffle cards so they're not always in the same order
