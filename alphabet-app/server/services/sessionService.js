@@ -252,7 +252,8 @@ export const gradeCard = db.transaction((letterId, mode, childId, correct) => {
       recent_fails = 0;
     }
 
-    if (repetitions >= 3 && interval_days >= 7) {
+    // Stricter mastery: 5 consecutive correct + 14-day interval
+    if (repetitions >= 5 && interval_days >= 14) {
       status = 'mastered';
     }
   } else {
