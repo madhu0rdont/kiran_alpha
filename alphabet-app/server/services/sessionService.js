@@ -47,13 +47,23 @@ const stmts = {
     LIMIT ?
   `),
 
-  // Fallback: any learning letters (even if not due) for extra practice
+  // Fallback: any learning letters (even if not due) for extra practice — randomized
   learningLettersAny: db.prepare(`
     SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
     FROM progress p
     JOIN letters l ON l.id = p.letter_id
     WHERE p.child_id = ? AND p.mode = ? AND p.status = 'learning'
-    ORDER BY p.next_review_date ASC
+    ORDER BY RANDOM()
+    LIMIT ?
+  `),
+
+  // Mastered letters in random order for mixing into sessions
+  masteredLettersRandom: db.prepare(`
+    SELECT p.*, l.character, l.case_type, l.image_name, l.display_order, l.has_image, l.display_word
+    FROM progress p
+    JOIN letters l ON l.id = p.letter_id
+    WHERE p.child_id = ? AND p.mode = ? AND p.status = 'mastered'
+    ORDER BY RANDOM()
     LIMIT ?
   `),
 
@@ -133,9 +143,10 @@ export function getSessionCards(mode, childId, count = 10) {
   const cards = [];
   const seen = new Set();
 
-  const addCards = (rows, flags) => {
+  const addCards = (rows, flags, limit) => {
+    const max = limit != null ? Math.min(cards.length + limit, count) : count;
     for (const row of rows) {
-      if (cards.length >= count) break;
+      if (cards.length >= max) break;
       if (seen.has(row.letter_id)) continue;
       seen.add(row.letter_id);
       cards.push({
@@ -151,57 +162,58 @@ export function getSessionCards(mode, childId, count = 10) {
     }
   };
 
-  // a. Problem letters (recent_fails >= 2, due)
-  addCards(stmts.problemLetters.all(childId, mode, d), { is_problem: true });
-
-  // b. Learning letters due for review
-  addCards(stmts.dueLetters.all(childId, mode, d), {});
-
-  // c. Check if we can introduce new letters
+  // Determine if we should reserve slots for new letters before filling review cards
   const learningCount = stmts.learningCount.get(childId, mode).c;
+  const completedSessions = stmts.sessionCount.get(childId, mode).c;
+  let reservedForNew = 0;
 
-  if (cards.length < count && learningCount < 7) {
-    const completedSessions = stmts.sessionCount.get(childId, mode).c;
-    let canIntroduce = false;
-    let introCount = 0;
-
+  if (learningCount < 10) {
     if (completedSessions === 0) {
-      // Very first session: introduce 3-4 letters
-      canIntroduce = true;
-      introCount = Math.min(4, count - cards.length);
+      reservedForNew = Math.min(4, count);
     } else {
-      // Check last session success rate >= 70%
       const last = stmts.lastSession.get(childId, mode);
-      if (last && last.total_cards > 0) {
-        const rate = last.correct_count / last.total_cards;
-        if (rate >= 0.7) {
-          canIntroduce = true;
-          introCount = Math.min(2, count - cards.length, 7 - learningCount);
-        }
+      if (last && last.total_cards > 0 && (last.correct_count / last.total_cards) >= 0.7) {
+        reservedForNew = Math.min(2, 10 - learningCount);
       }
     }
-
-    if (canIntroduce && introCount > 0) {
-      addCards(stmts.newLetters.all(childId, mode, introCount), { is_new: true });
-    }
   }
 
-  // e. Fill remaining with mastered letters (oldest reviewed first)
+  // Check if there are actually new letters available before reserving
+  const availableNewLetters = stmts.newLetters.all(childId, mode, reservedForNew || 1);
+  if (availableNewLetters.length === 0) reservedForNew = 0;
+  const reviewSlots = count - reservedForNew;
+
+  // a. Problem letters (recent_fails >= 2, due) — cap to leave room for new letters
+  addCards(stmts.problemLetters.all(childId, mode, d), { is_problem: true }, reviewSlots);
+
+  // b. Learning letters due for review — cap to leave room for new letters
+  addCards(stmts.dueLetters.all(childId, mode, d), {}, reviewSlots - cards.length);
+
+  // c. Introduce new letters into the reserved slots
+  if (reservedForNew > 0) {
+    addCards(availableNewLetters, { is_new: true }, reservedForNew);
+  }
+
+  // d. Fill remaining with a mix of not-yet-due learning + mastered letters (randomized)
   if (cards.length < count) {
     const remaining = count - cards.length;
-    addCards(stmts.masteredLetters.all(childId, mode, remaining), {});
+    // Pull from both pools randomly and interleave them
+    const extraLearning = stmts.learningLettersAny.all(childId, mode, remaining + seen.size);
+    const extraMastered = stmts.masteredLettersRandom.all(childId, mode, remaining + seen.size);
+    // Interleave: alternate learning and mastered for variety
+    const mixed = [];
+    let li = 0, mi = 0;
+    while (mixed.length < remaining + seen.size && (li < extraLearning.length || mi < extraMastered.length)) {
+      if (li < extraLearning.length) mixed.push(extraLearning[li++]);
+      if (mi < extraMastered.length) mixed.push(extraMastered[mi++]);
+    }
+    addCards(mixed, {});
   }
 
-  // f. If still short, introduce more new letters to reach minimum of count
+  // e. If still short, introduce more new letters to reach minimum of count
   if (cards.length < count) {
     const remaining = count - cards.length;
     addCards(stmts.newLetters.all(childId, mode, remaining + seen.size), { is_new: true });
-  }
-
-  // g. Fallback: if still empty, get any learning letters for extra practice (even if not due)
-  if (cards.length < count) {
-    const remaining = count - cards.length;
-    addCards(stmts.learningLettersAny.all(childId, mode, remaining + seen.size), {});
   }
 
   // Shuffle cards so they're not always in the same order
@@ -244,7 +256,7 @@ export const gradeCard = db.transaction((letterId, mode, childId, correct) => {
     } else if (repetitions === 2) {
       interval_days = 3;
     } else {
-      interval_days = Math.round(interval_days * ease_factor);
+      interval_days = Math.min(90, Math.round(interval_days * ease_factor));
     }
     ease_factor = Math.min(2.5, ease_factor + 0.1);
     // Only clear recent_fails after 3 consecutive correct answers
